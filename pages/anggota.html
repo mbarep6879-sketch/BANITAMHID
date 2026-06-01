@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Anggota Keluarga — BAFITS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../css/main.css"/>
+</head>
+<body>
+
+<div id="root" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f4f0ea">
+  <div style="text-align:center;color:#8a8a8a"><div style="font-size:32px;margin-bottom:12px">🌳</div><div>Memuat...</div></div>
+</div>
+
+<!-- MODAL: Form Tambah/Edit Anggota -->
+<div class="modal-backdrop" id="modalAnggota">
+  <div class="modal" style="max-width:780px">
+    <div class="modal-header">
+      <h3 id="modalTitle">Tambah Anggota Keluarga</h3>
+      <button class="btn-icon" onclick="closeForm()">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div id="formAlert"></div>
+
+      <!-- Tabs Form -->
+      <div class="tabs" id="formTabs">
+        <button class="tab-btn active" data-tab="tab-utama">Data Utama</button>
+        <button class="tab-btn" data-tab="tab-orang-tua">Orang Tua</button>
+        <button class="tab-btn" data-tab="tab-kontak">Kontak</button>
+        <button class="tab-btn" data-tab="tab-pernikahan">Pernikahan</button>
+      </div>
+
+      <form id="formAnggota">
+        <!-- TAB: Data Utama -->
+        <div class="tab-pane active" id="tab-utama">
+          <div class="form-grid">
+            <div class="form-group form-full">
+              <label class="form-label">Nama Lengkap <span class="required">*</span></label>
+              <input type="text" class="form-control" id="f-nama" placeholder="Masukkan nama lengkap" required/>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Jenis Kelamin <span class="required">*</span></label>
+              <div class="radio-group">
+                <label class="radio-opt"><input type="radio" name="jk" value="L" checked/> Laki-laki</label>
+                <label class="radio-opt"><input type="radio" name="jk" value="P"/> Perempuan</label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Status Hidup</label>
+              <select class="form-control" id="f-status-hidup" onchange="toggleStatusMeninggal()">
+                <option value="hidup">Hidup</option>
+                <option value="meninggal">Meninggal</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Tempat Lahir</label>
+              <input type="text" class="form-control" id="f-tempat-lahir" placeholder="Kota kelahiran"/>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Tanggal Lahir</label>
+              <input type="date" class="form-control" id="f-tgl-lahir"/>
+            </div>
+          </div>
+
+          <!-- Jika meninggal -->
+          <div id="wrap-meninggal" style="display:none;margin-top:16px;padding:16px;background:var(--cream);border-radius:10px;border:1px solid var(--border)">
+            <p style="font-size:12px;color:var(--text-light);margin-bottom:14px;font-style:italic">
+              🌙 Innalillahi wa Inna Ilaihi Raji'un
+            </p>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Tanggal Wafat</label>
+                <input type="date" class="form-control" id="f-tgl-wafat"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Lokasi Makam</label>
+                <input type="text" class="form-control" id="f-lokasi-makam" placeholder="TPU / Kampung halaman"/>
+              </div>
+              <div class="form-group form-full">
+                <label class="form-label">Keterangan</label>
+                <textarea class="form-control" id="f-ket-wafat" rows="2" placeholder="Keterangan tambahan..."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: Orang Tua -->
+        <div class="tab-pane" id="tab-orang-tua">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Nama Ayah</label>
+              <input type="text" class="form-control" id="f-nama-ayah" placeholder="Nama ayah kandung"/>
+              <div class="form-hint">Ketik nama untuk cari dari database</div>
+              <div id="saran-ayah" style="border:1px solid var(--border);border-radius:8px;background:#fff;display:none;max-height:180px;overflow-y:auto;margin-top:4px;box-shadow:var(--shadow-md)"></div>
+              <input type="hidden" id="f-ayah-id"/>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Nama Ibu</label>
+              <input type="text" class="form-control" id="f-nama-ibu" placeholder="Nama ibu kandung"/>
+              <div class="form-hint">Ketik nama untuk cari dari database</div>
+              <div id="saran-ibu" style="border:1px solid var(--border);border-radius:8px;background:#fff;display:none;max-height:180px;overflow-y:auto;margin-top:4px;box-shadow:var(--shadow-md)"></div>
+              <input type="hidden" id="f-ibu-id"/>
+            </div>
+          </div>
+          <div class="alert alert-warning" style="margin-top:16px">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Jika orang tua belum terdaftar di sistem, cukup ketikkan namanya saja tanpa perlu memilih dari saran.
+          </div>
+        </div>
+
+        <!-- TAB: Kontak -->
+        <div class="tab-pane" id="tab-kontak">
+          <div class="form-grid col-1">
+            <div class="form-group">
+              <label class="form-label">Alamat Lengkap</label>
+              <textarea class="form-control" id="f-alamat" rows="3" placeholder="Jalan, RT/RW, Kelurahan, Kecamatan, Kota..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nomor HP / WhatsApp</label>
+              <input type="tel" class="form-control" id="f-hp" placeholder="08xx-xxxx-xxxx"/>
+              <div class="form-hint">Kosongkan atau isi tanda (-) jika tidak ada</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email (opsional)</label>
+              <input type="email" class="form-control" id="f-email" placeholder="nama@email.com"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: Pernikahan -->
+        <div class="tab-pane" id="tab-pernikahan">
+          <div class="form-group" style="margin-bottom:16px">
+            <label class="form-label">Status Pernikahan</label>
+            <select class="form-control" id="f-status-nikah" style="max-width:280px">
+              <option value="belum_menikah">Belum Menikah</option>
+              <option value="menikah">Menikah</option>
+              <option value="cerai">Cerai</option>
+              <option value="duda_janda">Duda / Janda</option>
+            </select>
+          </div>
+
+          <div id="wrapRiwayatNikah">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+              <div style="font-size:13.5px;font-weight:600;color:var(--green-dark)">Riwayat Pernikahan</div>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="tambahRiwayatNikah()">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Tambah
+              </button>
+            </div>
+            <div id="listRiwayatNikah">
+              <div style="text-align:center;padding:24px;color:var(--text-light);font-size:13px;background:var(--cream);border-radius:8px">
+                Klik "Tambah" untuk menambahkan riwayat pernikahan
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" onclick="closeForm()">Batal</button>
+      <button type="button" class="btn btn-primary" id="btnSimpan" onclick="simpanAnggota()">
+        <span class="btn-text">💾 Simpan</span>
+        <div class="spinner"></div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Detail Anggota -->
+<div class="modal-backdrop" id="modalDetail">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <h3>Detail Anggota</h3>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-secondary btn-sm" id="btnEditDetail" onclick="editFromDetail()">✏️ Edit</button>
+        <button class="btn-icon" onclick="UI.closeModal('modalDetail')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="modal-body" id="detailContent">Memuat...</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../js/supabase.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+// ── STATE ──
+let currentPage  = 1;
+const perPage    = 15;
+let totalRows    = 0;
+let filterSearch = '';
+let filterJK     = '';
+let filterStatus = '';
+let editingId    = null;
+let detailId     = null;
+let riwayatNikah = [];
+let isAdmin      = false;
+
+// ── INIT ──
+(async () => {
+  const session = await BAFITS.Auth.requireAuth();
+  if (!session) return;
+  const user    = await BAFITS.Auth.getUser();
+  const profile = await BAFITS.UserProfile.getProfile(user.id);
+  isAdmin       = await BAFITS.UserProfile.isAdmin();
+
+  document.getElementById('root').outerHTML = `
+  <div class="app-shell">
+    ${UI._sidebar('anggota', profile)}
+    <div class="main-wrap">
+      ${UI._topbar('Anggota Keluarga', profile)}
+      <div class="page-content">
+
+        <!-- Toolbar -->
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:20px">
+          <div class="search-wrap">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input class="search-input" id="searchInput" placeholder="Cari nama, ayah, ibu, alamat..." oninput="onSearch(this.value)"/>
+          </div>
+
+          <select class="form-control" style="width:auto;padding:9px 14px" onchange="filterJK=this.value;currentPage=1;loadData()">
+            <option value="">Semua Jenis Kelamin</option>
+            <option value="L">Laki-laki</option>
+            <option value="P">Perempuan</option>
+          </select>
+
+          <select class="form-control" style="width:auto;padding:9px 14px" onchange="filterStatus=this.value;currentPage=1;loadData()">
+            <option value="">Semua Status</option>
+            <option value="hidup">Hidup</option>
+            <option value="meninggal">Meninggal</option>
+          </select>
+
+          <div style="flex:1"></div>
+          <span id="totalLabel" style="font-size:13px;color:var(--text-light)">—</span>
+
+          ${isAdmin ? `<button class="btn btn-primary" onclick="openForm()">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Tambah Anggota
+          </button>` : ''}
+        </div>
+
+        <!-- Tabel -->
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nama</th>
+                  <th>JK</th>
+                  <th>Orang Tua</th>
+                  <th>Tgl Lahir</th>
+                  <th>Status</th>
+                  <th>Kontak</th>
+                  <th style="text-align:center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyAnggota">
+                ${UI.skeletonRows(7, 8)}
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination" id="paginasi"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="sidebar-overlay" onclick="UI.closeSidebar()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99"></div>
+  `;
+
+  UI._bindEvents(profile);
+  UI.initTabs(document.getElementById('formTabs'));
+
+  // Cek query param
+  const params = new URLSearchParams(location.search);
+  if (params.get('action') === 'tambah' && isAdmin) openForm();
+  if (params.get('id')) showDetail(params.get('id'));
+
+  loadData();
+  setupAutoComplete();
+})();
+
+// ── LOAD DATA ──
+let searchTimer;
+function onSearch(val) {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => { filterSearch = val; currentPage = 1; loadData(); }, 400);
+}
+
+async function loadData() {
+  const tbody = document.getElementById('tbodyAnggota');
+  tbody.innerHTML = UI.skeletonRows(7, 8);
+
+  try {
+    let query = BAFITS.db
+      .from('anggota_keluarga')
+      .select('id, nama_lengkap, jenis_kelamin, nama_ayah, nama_ibu, tanggal_lahir, status_hidup, nomor_hp, foto_profil_url', { count: 'exact' })
+      .order('nama_lengkap')
+      .range((currentPage-1)*perPage, currentPage*perPage-1);
+
+    if (filterSearch) query = query.or(`nama_lengkap.ilike.%${filterSearch}%,nama_ayah.ilike.%${filterSearch}%,nama_ibu.ilike.%${filterSearch}%,alamat.ilike.%${filterSearch}%`);
+    if (filterJK)     query = query.eq('jenis_kelamin', filterJK);
+    if (filterStatus) query = query.eq('status_hidup', filterStatus);
+
+    const { data, count, error } = await query;
+    if (error) throw error;
+
+    totalRows = count || 0;
+    document.getElementById('totalLabel').textContent = `${totalRows.toLocaleString('id')} anggota`;
+
+    if (!data?.length) {
+      tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">
+        <div class="empty-icon">👨‍👩‍👧‍👦</div>
+        <h3>Belum ada data</h3>
+        <p>Tambahkan anggota keluarga pertama</p>
+      </div></td></tr>`;
+      renderPaginasi();
+      return;
+    }
+
+    tbody.innerHTML = data.map(a => `
+      <tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="avatar" style="background:${a.jenis_kelamin==='L'?'#e8f0fe':'#f3e8fd'};color:${a.jenis_kelamin==='L'?'#1a56b0':'#7b2fbe'}">
+              ${a.foto_profil_url ? `<img src="${a.foto_profil_url}" alt="">` : UI.inisial(a.nama_lengkap)}
+            </div>
+            <div>
+              <div style="font-weight:500;font-size:13.5px">${a.nama_lengkap}</div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <span class="badge ${a.jenis_kelamin==='L'?'badge-blue':'badge-purple'}" style="font-size:11px">
+            ${a.jenis_kelamin==='L'?'L':'P'}
+          </span>
+        </td>
+        <td style="font-size:12.5px;color:var(--text-mid)">
+          <div>${a.nama_ayah ? '👨 '+a.nama_ayah : '—'}</div>
+          <div>${a.nama_ibu  ? '👩 '+a.nama_ibu  : ''}</div>
+        </td>
+        <td style="font-size:12.5px;color:var(--text-mid);white-space:nowrap">
+          ${a.tanggal_lahir ? UI.formatDate(a.tanggal_lahir) : '—'}
+        </td>
+        <td>
+          <span class="badge ${a.status_hidup==='hidup'?'badge-green':'badge-gray'}">
+            ${a.status_hidup==='hidup'?'Hidup':'Almarhum'}
+          </span>
+        </td>
+        <td style="font-size:12.5px;color:var(--text-mid)">${a.nomor_hp || '—'}</td>
+        <td>
+          <div class="td-actions" style="justify-content:center">
+            <button class="btn-icon" title="Lihat detail" onclick="showDetail('${a.id}')">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+            ${isAdmin ? `
+            <button class="btn-icon" title="Edit" onclick="editAnggota('${a.id}')">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="btn-icon" title="Hapus" style="color:var(--error)" onclick="hapusAnggota('${a.id}','${a.nama_lengkap.replace(/'/g,"\\'")}')">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg>
+            </button>` : ''}
+          </div>
+        </td>
+      </tr>`).join('');
+
+    renderPaginasi();
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="alert alert-error" style="margin:16px">Gagal memuat data: ${err.message}</div></td></tr>`;
+  }
+}
+
+function renderPaginasi() {
+  const totalPages = Math.ceil(totalRows / perPage);
+  const el = document.getElementById('paginasi');
+  if (totalPages <= 1) { el.innerHTML = ''; return; }
+
+  let html = `<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage<=1?'disabled':''}>‹</button>`;
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 1) {
+      html += `<button class="page-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+    } else if (Math.abs(i - currentPage) === 2) {
+      html += `<span style="padding:0 4px;color:var(--text-light)">…</span>`;
+    }
+  }
+  html += `<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage>=totalPages?'disabled':''}>›</button>`;
+  el.innerHTML = html;
+}
+
+function goPage(p) {
+  const totalPages = Math.ceil(totalRows / perPage);
+  if (p < 1 || p > totalPages) return;
+  currentPage = p;
+  loadData();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── AUTOCOMPLETE ORANG TUA ──
+function setupAutoComplete() {
+  setupAC('f-nama-ayah', 'saran-ayah', 'f-ayah-id', 'L');
+  setupAC('f-nama-ibu',  'saran-ibu',  'f-ibu-id',  'P');
+}
+
+function setupAC(inputId, saranId, hiddenId, jk) {
+  const input  = document.getElementById(inputId);
+  const saran  = document.getElementById(saranId);
+  let timer;
+  if (!input) return;
+
+  input.addEventListener('input', () => {
+    clearTimeout(timer);
+    document.getElementById(hiddenId).value = '';
+    const val = input.value.trim();
+    if (val.length < 2) { saran.style.display = 'none'; return; }
+    timer = setTimeout(async () => {
+      const { data } = await BAFITS.db
+        .from('anggota_keluarga')
+        .select('id, nama_lengkap, tanggal_lahir')
+        .eq('jenis_kelamin', jk)
+        .ilike('nama_lengkap', `%${val}%`)
+        .limit(6);
+      if (!data?.length) { saran.style.display = 'none'; return; }
+      saran.innerHTML = data.map(d => `
+        <div onclick="pilihOrangTua('${inputId}','${saranId}','${hiddenId}','${d.id}','${d.nama_lengkap.replace(/'/g,"\\'")}')"
+          style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border);transition:background .1s"
+          onmouseenter="this.style.background='var(--green-pale)'"
+          onmouseleave="this.style.background=''"
+        >
+          <span style="font-weight:500">${d.nama_lengkap}</span>
+          ${d.tanggal_lahir ? `<span style="color:var(--text-light);font-size:11px;margin-left:8px">${UI.formatDate(d.tanggal_lahir)}</span>` : ''}
+        </div>`).join('');
+      saran.style.display = 'block';
+    }, 300);
+  });
+  document.addEventListener('click', e => { if (!input.contains(e.target)) saran.style.display = 'none'; });
+}
+
+function pilihOrangTua(inputId, saranId, hiddenId, id, nama) {
+  document.getElementById(inputId).value = nama;
+  document.getElementById(hiddenId).value = id;
+  document.getElementById(saranId).style.display = 'none';
+}
+
+// ── FORM OPEN / CLOSE ──
+function openForm(data = null) {
+  editingId = data?.id || null;
+  riwayatNikah = [];
+
+  document.getElementById('modalTitle').textContent = data ? 'Edit Anggota Keluarga' : 'Tambah Anggota Keluarga';
+  document.getElementById('formAlert').innerHTML = '';
+
+  // Reset form
+  ['f-nama','f-tempat-lahir','f-nama-ayah','f-ayah-id','f-nama-ibu','f-ibu-id','f-alamat','f-hp','f-email','f-tgl-lahir','f-tgl-wafat','f-lokasi-makam','f-ket-wafat']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+
+  document.querySelector('input[name="jk"][value="L"]').checked = true;
+  document.getElementById('f-status-hidup').value = 'hidup';
+  document.getElementById('f-status-nikah').value = 'belum_menikah';
+  document.getElementById('wrap-meninggal').style.display = 'none';
+  renderRiwayatNikah();
+
+  // Isi data jika edit
+  if (data) {
+    document.getElementById('f-nama').value         = data.nama_lengkap || '';
+    document.getElementById('f-tempat-lahir').value = data.tempat_lahir || '';
+    document.getElementById('f-tgl-lahir').value    = data.tanggal_lahir || '';
+    document.getElementById('f-nama-ayah').value    = data.nama_ayah || '';
+    document.getElementById('f-ayah-id').value      = data.nama_ayah_id || '';
+    document.getElementById('f-nama-ibu').value     = data.nama_ibu || '';
+    document.getElementById('f-ibu-id').value       = data.nama_ibu_id || '';
+    document.getElementById('f-alamat').value       = data.alamat || '';
+    document.getElementById('f-hp').value           = data.nomor_hp || '';
+    document.getElementById('f-email').value        = data.email || '';
+    document.getElementById('f-status-hidup').value = data.status_hidup || 'hidup';
+    document.getElementById('f-tgl-wafat').value    = data.tanggal_wafat || '';
+    document.getElementById('f-lokasi-makam').value = data.lokasi_makam || '';
+    document.getElementById('f-ket-wafat').value    = data.keterangan_wafat || '';
+    document.getElementById('f-status-nikah').value = data.status_pernikahan || 'belum_menikah';
+    document.querySelector(`input[name="jk"][value="${data.jenis_kelamin || 'L'}"]`).checked = true;
+    toggleStatusMeninggal();
+    if (data.pernikahan) { riwayatNikah = data.pernikahan; renderRiwayatNikah(); }
+  }
+
+  UI.openModal('modalAnggota');
+}
+
+function closeForm() { UI.closeModal('modalAnggota'); editingId = null; }
+
+function toggleStatusMeninggal() {
+  const val = document.getElementById('f-status-hidup').value;
+  document.getElementById('wrap-meninggal').style.display = val === 'meninggal' ? 'block' : 'none';
+}
+
+// ── RIWAYAT NIKAH ──
+function tambahRiwayatNikah() {
+  riwayatNikah.push({ nama_pasangan: '', tanggal_menikah: '', tanggal_berakhir: '', status: 'aktif', urutan: riwayatNikah.length + 1 });
+  renderRiwayatNikah();
+}
+
+function hapusRiwayatNikah(idx) { riwayatNikah.splice(idx, 1); renderRiwayatNikah(); }
+
+function renderRiwayatNikah() {
+  const container = document.getElementById('listRiwayatNikah');
+  if (!riwayatNikah.length) {
+    container.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text-light);font-size:13px;background:var(--cream);border-radius:8px">Klik "Tambah" untuk menambahkan riwayat pernikahan</div>`;
+    return;
+  }
+  container.innerHTML = riwayatNikah.map((r, i) => `
+    <div style="padding:16px;background:var(--cream);border-radius:10px;border:1px solid var(--border);margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <span style="font-size:13px;font-weight:600;color:var(--green-dark)">💍 Pernikahan ke-${i+1}</span>
+        <button type="button" onclick="hapusRiwayatNikah(${i})" style="font-size:12px;color:var(--error);background:none;border:none;cursor:pointer">Hapus</button>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Nama Pasangan <span class="required">*</span></label>
+          <input type="text" class="form-control" value="${r.nama_pasangan||''}" placeholder="Nama suami/istri"
+            onchange="riwayatNikah[${i}].nama_pasangan=this.value"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-control" onchange="riwayatNikah[${i}].status=this.value">
+            <option value="aktif" ${r.status==='aktif'?'selected':''}>Aktif / Masih menikah</option>
+            <option value="cerai" ${r.status==='cerai'?'selected':''}>Cerai</option>
+            <option value="meninggal" ${r.status==='meninggal'?'selected':''}>Pasangan meninggal</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tanggal Menikah</label>
+          <input type="date" class="form-control" value="${r.tanggal_menikah||''}"
+            onchange="riwayatNikah[${i}].tanggal_menikah=this.value"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tanggal Berakhir</label>
+          <input type="date" class="form-control" value="${r.tanggal_berakhir||''}"
+            onchange="riwayatNikah[${i}].tanggal_berakhir=this.value"/>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ── SIMPAN ──
+async function simpanAnggota() {
+  const btn = document.getElementById('btnSimpan');
+  const alertEl = document.getElementById('formAlert');
+  alertEl.innerHTML = '';
+
+  const nama = document.getElementById('f-nama').value.trim();
+  if (!nama) {
+    alertEl.innerHTML = `<div class="alert alert-error"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Nama lengkap wajib diisi.</div>`;
+    return;
+  }
+
+  const riwayatInvalid = riwayatNikah.find(r => !r.nama_pasangan?.trim());
+  if (riwayatInvalid) {
+    alertEl.innerHTML = `<div class="alert alert-error">Nama pasangan di riwayat pernikahan wajib diisi.</div>`;
+    return;
+  }
+
+  UI.setLoading(btn, true);
+
+  try {
+    const payload = {
+      nama_lengkap:      nama,
+      jenis_kelamin:     document.querySelector('input[name="jk"]:checked').value,
+      tempat_lahir:      document.getElementById('f-tempat-lahir').value.trim() || null,
+      tanggal_lahir:     document.getElementById('f-tgl-lahir').value || null,
+      nama_ayah:         document.getElementById('f-nama-ayah').value.trim() || null,
+      nama_ayah_id:      document.getElementById('f-ayah-id').value || null,
+      nama_ibu:          document.getElementById('f-nama-ibu').value.trim() || null,
+      nama_ibu_id:       document.getElementById('f-ibu-id').value || null,
+      alamat:            document.getElementById('f-alamat').value.trim() || null,
+      nomor_hp:          document.getElementById('f-hp').value.trim() || null,
+      email:             document.getElementById('f-email').value.trim() || null,
+      status_hidup:      document.getElementById('f-status-hidup').value,
+      tanggal_wafat:     document.getElementById('f-tgl-wafat').value || null,
+      lokasi_makam:      document.getElementById('f-lokasi-makam').value.trim() || null,
+      keterangan_wafat:  document.getElementById('f-ket-wafat').value.trim() || null,
+      status_pernikahan: document.getElementById('f-status-nikah').value,
+    };
+
+    let anggotaId;
+    if (editingId) {
+      await BAFITS.Anggota.update(editingId, payload);
+      anggotaId = editingId;
+    } else {
+      const result = await BAFITS.Anggota.create(payload);
+      anggotaId = result.id;
+    }
+
+    // Simpan riwayat nikah
+    if (anggotaId && !editingId) {
+      for (let i = 0; i < riwayatNikah.length; i++) {
+        const r = riwayatNikah[i];
+        if (!r.nama_pasangan?.trim()) continue;
+        await BAFITS.db.from('pernikahan_anggota').insert({
+          anggota_id: anggotaId,
+          nama_pasangan: r.nama_pasangan.trim(),
+          tanggal_menikah: r.tanggal_menikah || null,
+          tanggal_berakhir: r.tanggal_berakhir || null,
+          status: r.status || 'aktif',
+          urutan: i + 1
+        });
+      }
+    }
+
+    BAFITS.Toast.success(editingId ? 'Data berhasil diperbarui!' : 'Anggota berhasil ditambahkan!');
+    closeForm();
+    loadData();
+  } catch (err) {
+    alertEl.innerHTML = `<div class="alert alert-error">Gagal menyimpan: ${err.message}</div>`;
+  } finally {
+    UI.setLoading(btn, false);
+  }
+}
+
+// ── EDIT ──
+async function editAnggota(id) {
+  try {
+    const data = await BAFITS.Anggota.getById(id);
+    openForm(data);
+  } catch (err) {
+    BAFITS.Toast.error('Gagal memuat data: ' + err.message);
+  }
+}
+
+function editFromDetail() {
+  UI.closeModal('modalDetail');
+  if (detailId) editAnggota(detailId);
+}
+
+// ── HAPUS ──
+function hapusAnggota(id, nama) {
+  UI.confirm(
+    `Hapus anggota <strong>${nama}</strong>? Semua data terkait (foto, pernikahan) juga akan terhapus.`,
+    async () => {
+      try {
+        await BAFITS.Anggota.delete(id);
+        BAFITS.Toast.success('Anggota berhasil dihapus.');
+        loadData();
+      } catch (err) {
+        BAFITS.Toast.error('Gagal menghapus: ' + err.message);
+      }
+    }, 'Hapus'
+  );
+}
+
+// ── DETAIL ──
+async function showDetail(id) {
+  detailId = id;
+  UI.openModal('modalDetail');
+  document.getElementById('detailContent').innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-light)">Memuat data...</div>`;
+  if (!isAdmin) document.getElementById('btnEditDetail').style.display = 'none';
+
+  try {
+    const a = await BAFITS.Anggota.getById(id);
+
+    document.getElementById('detailContent').innerHTML = `
+      <div style="display:flex;gap:20px;align-items:flex-start;margin-bottom:20px">
+        <div class="avatar" style="width:72px;height:72px;font-size:26px;border-radius:16px;background:${a.jenis_kelamin==='L'?'#e8f0fe':'#f3e8fd'};color:${a.jenis_kelamin==='L'?'#1a56b0':'#7b2fbe'}">
+          ${a.foto_profil_url ? `<img src="${a.foto_profil_url}" alt="" style="width:72px;height:72px;border-radius:16px;object-fit:cover">` : UI.inisial(a.nama_lengkap)}
+        </div>
+        <div>
+          <div style="font-size:20px;font-weight:600;color:var(--green-dark);margin-bottom:4px">${a.nama_lengkap}</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span class="badge ${a.jenis_kelamin==='L'?'badge-blue':'badge-purple'}">${a.jenis_kelamin==='L'?'Laki-laki':'Perempuan'}</span>
+            <span class="badge ${a.status_hidup==='hidup'?'badge-green':'badge-gray'}">${a.status_hidup==='hidup'?'Hidup':'Almarhum/ah'}</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px 20px">
+        ${detailRow('Tempat Lahir', a.tempat_lahir)}
+        ${detailRow('Tanggal Lahir', UI.formatDate(a.tanggal_lahir))}
+        ${detailRow('Usia', UI.formatAge(a.tanggal_lahir, a.tanggal_wafat))}
+        ${detailRow('Status Nikah', { belum_menikah:'Belum Menikah', menikah:'Menikah', cerai:'Cerai', duda_janda:'Duda/Janda'}[a.status_pernikahan] || '—')}
+        ${detailRow('Ayah', a.nama_ayah)}
+        ${detailRow('Ibu', a.nama_ibu)}
+        ${a.status_hidup === 'meninggal' ? detailRow('Tanggal Wafat', UI.formatDate(a.tanggal_wafat)) : ''}
+        ${a.status_hidup === 'meninggal' ? detailRow('Lokasi Makam', a.lokasi_makam) : ''}
+        ${detailRow('Alamat', a.alamat, true)}
+        ${detailRow('Nomor HP', a.nomor_hp)}
+        ${detailRow('Email', a.email)}
+      </div>
+
+      ${a.pernikahan?.length ? `
+      <div class="divider"></div>
+      <div style="font-size:14px;font-weight:600;color:var(--green-dark);margin-bottom:12px">💍 Riwayat Pernikahan</div>
+      ${a.pernikahan.map((p,i) => `
+        <div style="padding:12px 16px;background:var(--cream);border-radius:8px;margin-bottom:8px">
+          <div style="font-weight:500;margin-bottom:4px">Ke-${p.urutan||i+1}: ${p.nama_pasangan}</div>
+          <div style="font-size:12px;color:var(--text-light)">
+            ${p.tanggal_menikah ? 'Menikah: '+UI.formatDate(p.tanggal_menikah) : ''}
+            ${p.status !== 'aktif' ? ' · '+{cerai:'Cerai',meninggal:'Pasangan meninggal'}[p.status] : ''}
+          </div>
+        </div>`).join('')}` : ''}
+
+      ${a.anak?.length ? `
+      <div class="divider"></div>
+      <div style="font-size:14px;font-weight:600;color:var(--green-dark);margin-bottom:12px">👶 Anak (${a.anak.length})</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        ${a.anak.map(ak => `
+          <div onclick="showDetail('${ak.id}')" style="padding:8px 14px;background:var(--green-pale);border-radius:8px;cursor:pointer;font-size:13px;color:var(--green-mid);font-weight:500">
+            ${ak.nama_lengkap}
+          </div>`).join('')}
+      </div>` : ''}
+    `;
+  } catch (err) {
+    document.getElementById('detailContent').innerHTML = `<div class="alert alert-error">Gagal memuat: ${err.message}</div>`;
+  }
+}
+
+function detailRow(label, value, full = false) {
+  return `<div ${full ? 'style="grid-column:1/-1"' : ''}>
+    <div style="font-size:11.5px;color:var(--text-light);margin-bottom:2px;text-transform:uppercase;letter-spacing:.5px">${label}</div>
+    <div style="font-size:13.5px;color:var(--text-dark)">${value || '—'}</div>
+  </div>`;
+}
+</script>
+</body>
+</html>
