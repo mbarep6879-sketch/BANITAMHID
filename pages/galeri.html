@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Galeri Foto — BANITAMHID</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../css/main.css"/>
+  <style>
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    .gallery-card {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      transition: box-shadow .2s, transform .15s;
+      cursor: pointer;
+    }
+    .gallery-card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
+
+    .gallery-img-wrap {
+      width: 100%; aspect-ratio: 1;
+      background: var(--cream);
+      overflow: hidden; position: relative;
+    }
+    .gallery-img-wrap img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform .3s;
+    }
+    .gallery-card:hover .gallery-img-wrap img { transform: scale(1.05); }
+
+    .gallery-img-placeholder {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 48px; color: var(--text-light);
+    }
+
+    .gallery-info { padding: 12px; }
+    .gallery-name { font-size: 13px; font-weight: 600; color: var(--green-dark); margin-bottom: 2px; }
+    .gallery-meta { font-size: 11.5px; color: var(--text-light); }
+
+    .gallery-overlay {
+      position: absolute; inset: 0;
+      background: rgba(15,61,46,.0);
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; transition: background .2s;
+    }
+    .gallery-card:hover .gallery-overlay { background: rgba(15,61,46,.35); }
+    .gallery-overlay-btn {
+      opacity: 0; transition: opacity .2s;
+      background: rgba(255,255,255,.9); border: none; border-radius: 8px;
+      padding: 8px 14px; font-size: 12.5px; font-weight: 500;
+      color: var(--green-dark); cursor: pointer;
+    }
+    .gallery-card:hover .gallery-overlay-btn { opacity: 1; }
+
+    /* Upload area */
+    .upload-area {
+      border: 2.5px dashed var(--border);
+      border-radius: var(--radius-lg);
+      padding: 40px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      background: #fff;
+    }
+    .upload-area:hover, .upload-area.drag-over {
+      border-color: var(--green-light);
+      background: var(--green-pale);
+    }
+    .upload-area input[type="file"] { display: none; }
+
+    /* Lightbox */
+    .lightbox {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.92);
+      z-index: 300; display: none;
+      align-items: center; justify-content: center;
+      flex-direction: column; gap: 16px;
+    }
+    .lightbox.show { display: flex; }
+    .lightbox img { max-width: 90vw; max-height: 80vh; object-fit: contain; border-radius: 8px; }
+    .lightbox-caption { color: rgba(255,255,255,.8); font-size: 14px; }
+    .lightbox-close {
+      position: absolute; top: 20px; right: 20px;
+      background: rgba(255,255,255,.15); border: none; color: #fff;
+      width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+      font-size: 20px; display: flex; align-items: center; justify-content: center;
+    }
+    .lightbox-nav {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: rgba(255,255,255,.15); border: none; color: #fff;
+      width: 44px; height: 44px; border-radius: 50%; cursor: pointer;
+      font-size: 22px; display: flex; align-items: center; justify-content: center;
+    }
+    .lightbox-prev { left: 20px; }
+    .lightbox-next { right: 20px; }
+
+    /* Upload progress */
+    .upload-progress {
+      width: 100%; height: 4px; background: var(--border);
+      border-radius: 2px; overflow: hidden; margin-top: 12px; display: none;
+    }
+    .upload-progress-bar {
+      height: 100%; background: var(--green-light);
+      border-radius: 2px; width: 0;
+      transition: width .3s;
+    }
+
+    .tipe-badge { display: inline-flex; align-items: center; gap: 4px; }
+  </style>
+</head>
+<body>
+
+<div id="root" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f4f0ea">
+  <div style="text-align:center;color:#8a8a8a"><div style="font-size:32px">🌳</div><div>Memuat...</div></div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <button class="lightbox-nav lightbox-prev" onclick="event.stopPropagation();navLightbox(-1)">‹</button>
+  <img id="lightboxImg" src="" alt=""/>
+  <div class="lightbox-caption" id="lightboxCaption"></div>
+  <button class="lightbox-nav lightbox-next" onclick="event.stopPropagation();navLightbox(1)">›</button>
+</div>
+
+<!-- Modal Upload -->
+<div class="modal-backdrop" id="modalUpload">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <h3>📷 Upload Foto</h3>
+      <button class="btn-icon" onclick="UI.closeModal('modalUpload')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:16px">
+        <label class="form-label">Pilih Anggota <span class="required">*</span></label>
+        <select class="form-control" id="uploadAnggotaId">
+          <option value="">— Pilih anggota keluarga —</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label class="form-label">Tipe Foto</label>
+        <select class="form-control" id="uploadTipe">
+          <option value="profil">Foto Profil</option>
+          <option value="keluarga">Foto Keluarga</option>
+          <option value="dokumen">Dokumen</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label class="form-label">Keterangan (opsional)</label>
+        <input type="text" class="form-control" id="uploadKet" placeholder="Contoh: Foto wisuda 2023"/>
+      </div>
+
+      <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+        <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.webp" multiple onchange="previewFiles(this.files)"/>
+        <div id="uploadAreaContent">
+          <div style="font-size:36px;margin-bottom:12px">📁</div>
+          <div style="font-size:14px;font-weight:500;color:var(--green-dark);margin-bottom:4px">Klik atau seret file ke sini</div>
+          <div style="font-size:12px;color:var(--text-light)">JPG, JPEG, PNG, WEBP · Maks. 5MB per file</div>
+        </div>
+        <div class="upload-progress" id="uploadProgress">
+          <div class="upload-progress-bar" id="uploadProgressBar"></div>
+        </div>
+      </div>
+      <div id="previewGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px"></div>
+      <div id="uploadAlert" style="margin-top:12px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="UI.closeModal('modalUpload')">Batal</button>
+      <button class="btn btn-primary" id="btnUpload" onclick="doUpload()">
+        <span class="btn-text">⬆ Upload</span>
+        <div class="spinner"></div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../js/supabase.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+let allFoto    = [];
+let lightboxIdx = 0;
+let isAdmin    = false;
+let selectedFiles = [];
+let filterAnggota = '';
+let filterTipe    = '';
+
+(async () => {
+  const session = await BANITAMHID.Auth.requireAuth();
+  if (!session) return;
+  const user    = await BANITAMHID.Auth.getUser();
+  const profile = await BANITAMHID.UserProfile.getProfile(user.id);
+  isAdmin       = await BANITAMHID.UserProfile.isAdmin();
+
+  document.getElementById('root').outerHTML = `
+  <div class="app-shell">
+    ${UI._sidebar('galeri', profile)}
+    <div class="main-wrap">
+      ${UI._topbar('Galeri Foto', profile)}
+      <div class="page-content">
+
+        <!-- Toolbar -->
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:20px">
+          <div class="search-wrap">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input class="search-input" placeholder="Cari nama anggota..." oninput="filterGallery(this.value,'anggota')"/>
+          </div>
+          <select class="form-control" style="width:auto;padding:9px 14px" onchange="filterGallery(this.value,'tipe')">
+            <option value="">Semua Tipe</option>
+            <option value="profil">Foto Profil</option>
+            <option value="keluarga">Foto Keluarga</option>
+            <option value="dokumen">Dokumen</option>
+          </select>
+          <div style="flex:1"></div>
+          <span id="totalFoto" style="font-size:13px;color:var(--text-light)">—</span>
+          ${isAdmin ? `<button class="btn btn-primary" onclick="openUpload()">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+            Upload Foto
+          </button>` : ''}
+        </div>
+
+        <div class="gallery-grid" id="galleryGrid">
+          ${[1,2,3,4,5,6].map(()=>`
+          <div class="card" style="overflow:hidden">
+            <div class="skeleton" style="aspect-ratio:1;border-radius:0"></div>
+            <div style="padding:12px">
+              <div class="skeleton" style="height:14px;width:70%;border-radius:4px;margin-bottom:6px"></div>
+              <div class="skeleton" style="height:11px;width:50%;border-radius:4px"></div>
+            </div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="sidebar-overlay" onclick="UI.closeSidebar()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99"></div>
+  `;
+
+  UI._bindEvents(profile);
+  await loadFoto();
+  await populateAnggotaSelect();
+  setupDragDrop();
+})();
+
+async function loadFoto() {
+  try {
+    const { data, error } = await BANITAMHID.db
+      .from('foto_anggota')
+      .select(`*, anggota:anggota_keluarga(id, nama_lengkap, jenis_kelamin)`)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    allFoto = data || [];
+    renderGallery(allFoto);
+  } catch (err) {
+    BANITAMHID.Toast.error('Gagal memuat galeri: ' + err.message);
+  }
+}
+
+function renderGallery(foto) {
+  const grid = document.getElementById('galleryGrid');
+  document.getElementById('totalFoto').textContent = `${foto.length} foto`;
+
+  if (!foto.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;padding:80px 24px">
+      <div class="empty-icon">📷</div>
+      <h3>Belum ada foto</h3>
+      <p>Upload foto anggota keluarga untuk memulai galeri</p>
+    </div>`;
+    return;
+  }
+
+  const tipeLabel = { profil:'Profil', keluarga:'Keluarga', dokumen:'Dokumen' };
+  const tipeIcon  = { profil:'👤', keluarga:'👨‍👩‍👧', dokumen:'📄' };
+
+  grid.innerHTML = foto.map((f, idx) => `
+    <div class="gallery-card" onclick="openLightbox(${idx})">
+      <div class="gallery-img-wrap">
+        ${f.url ? `<img src="${f.url}" alt="${f.anggota?.nama_lengkap||''}" loading="lazy"/>` :
+          `<div class="gallery-img-placeholder">🖼️</div>`}
+        <div class="gallery-overlay">
+          <button class="gallery-overlay-btn">🔍 Lihat</button>
+          ${isAdmin ? `<button class="gallery-overlay-btn" onclick="event.stopPropagation();hapusFoto('${f.id}','${f.storage_path||''}')">🗑</button>` : ''}
+        </div>
+      </div>
+      <div class="gallery-info">
+        <div class="gallery-name">${f.anggota?.nama_lengkap || 'Tanpa nama'}</div>
+        <div class="gallery-meta">
+          ${tipeIcon[f.tipe]||''} ${tipeLabel[f.tipe]||f.tipe}
+          ${f.keterangan ? ` · ${f.keterangan}` : ''}
+        </div>
+        <div class="gallery-meta">${UI.formatDate(f.created_at)}</div>
+      </div>
+    </div>`).join('');
+}
+
+function filterGallery(val, type) {
+  if (type === 'anggota') filterAnggota = val.toLowerCase();
+  if (type === 'tipe')    filterTipe    = val;
+  const filtered = allFoto.filter(f => {
+    const matchNama = !filterAnggota || (f.anggota?.nama_lengkap||'').toLowerCase().includes(filterAnggota);
+    const matchTipe = !filterTipe    || f.tipe === filterTipe;
+    return matchNama && matchTipe;
+  });
+  renderGallery(filtered);
+}
+
+// ── LIGHTBOX ──
+function openLightbox(idx) {
+  lightboxIdx = idx;
+  showLightboxPhoto();
+  document.getElementById('lightbox').classList.add('show');
+}
+
+function showLightboxPhoto() {
+  const f = allFoto[lightboxIdx];
+  if (!f) return;
+  document.getElementById('lightboxImg').src = f.url || '';
+  document.getElementById('lightboxCaption').textContent = `${f.anggota?.nama_lengkap||''} · ${f.tipe}${f.keterangan?' · '+f.keterangan:''}`;
+}
+
+function navLightbox(dir) {
+  lightboxIdx = (lightboxIdx + dir + allFoto.length) % allFoto.length;
+  showLightboxPhoto();
+}
+
+function closeLightbox(e) {
+  if (!e || e.target === document.getElementById('lightbox') || e.target.classList.contains('lightbox-close')) {
+    document.getElementById('lightbox').classList.remove('show');
+  }
+}
+
+document.addEventListener('keydown', e => {
+  const lb = document.getElementById('lightbox');
+  if (!lb?.classList.contains('show')) return;
+  if (e.key === 'Escape') lb.classList.remove('show');
+  if (e.key === 'ArrowLeft')  navLightbox(-1);
+  if (e.key === 'ArrowRight') navLightbox(1);
+});
+
+// ── UPLOAD ──
+async function populateAnggotaSelect() {
+  const { data } = await BANITAMHID.db.from('anggota_keluarga').select('id, nama_lengkap').order('nama_lengkap');
+  const sel = document.getElementById('uploadAnggotaId');
+  data?.forEach(a => {
+    const opt = document.createElement('option');
+    opt.value = a.id; opt.textContent = a.nama_lengkap;
+    sel.appendChild(opt);
+  });
+}
+
+function openUpload() {
+  selectedFiles = [];
+  document.getElementById('previewGrid').innerHTML = '';
+  document.getElementById('uploadAlert').innerHTML = '';
+  document.getElementById('uploadAnggotaId').value = '';
+  document.getElementById('uploadTipe').value = 'profil';
+  document.getElementById('uploadKet').value = '';
+  UI.openModal('modalUpload');
+}
+
+function previewFiles(files) {
+  selectedFiles = Array.from(files);
+  const grid = document.getElementById('previewGrid');
+  grid.innerHTML = selectedFiles.map((f, i) => `
+    <div style="position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;border:1px solid var(--border)">
+      <img id="prev-${i}" style="width:100%;height:100%;object-fit:cover" alt=""/>
+      <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.5);color:#fff;font-size:9px;padding:3px 6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${f.name}</div>
+    </div>`).join('');
+  selectedFiles.forEach((f, i) => {
+    const reader = new FileReader();
+    reader.onload = e => { const img = document.getElementById('prev-'+i); if(img) img.src = e.target.result; };
+    reader.readAsDataURL(f);
+  });
+}
+
+function setupDragDrop() {
+  const area = document.getElementById('uploadArea');
+  if (!area) return;
+  area.addEventListener('dragover', e => { e.preventDefault(); area.classList.add('drag-over'); });
+  area.addEventListener('dragleave', () => area.classList.remove('drag-over'));
+  area.addEventListener('drop', e => {
+    e.preventDefault(); area.classList.remove('drag-over');
+    if (e.dataTransfer.files.length) previewFiles(e.dataTransfer.files);
+  });
+}
+
+async function doUpload() {
+  const anggotaId = document.getElementById('uploadAnggotaId').value;
+  const tipe      = document.getElementById('uploadTipe').value;
+  const ket       = document.getElementById('uploadKet').value.trim();
+  const alertEl   = document.getElementById('uploadAlert');
+  const btn       = document.getElementById('btnUpload');
+
+  if (!anggotaId) { alertEl.innerHTML = `<div class="alert alert-error">Pilih anggota terlebih dahulu.</div>`; return; }
+  if (!selectedFiles.length) { alertEl.innerHTML = `<div class="alert alert-error">Pilih minimal satu foto.</div>`; return; }
+
+  const tooLarge = selectedFiles.filter(f => f.size > 5 * 1024 * 1024);
+  if (tooLarge.length) { alertEl.innerHTML = `<div class="alert alert-error">File terlalu besar (maks 5MB): ${tooLarge.map(f=>f.name).join(', ')}</div>`; return; }
+
+  UI.setLoading(btn, true);
+  alertEl.innerHTML = '';
+  const progressWrap = document.getElementById('uploadProgress');
+  const progressBar  = document.getElementById('uploadProgressBar');
+  progressWrap.style.display = 'block';
+
+  let uploaded = 0;
+  const errors = [];
+
+  for (const file of selectedFiles) {
+    try {
+      const ext  = file.name.split('.').pop().toLowerCase();
+      const path = `${anggotaId}/${tipe}_${Date.now()}_${Math.random().toString(36).substr(2,5)}.${ext}`;
+
+      const { error: upErr } = await BANITAMHID.db.storage.from('foto-anggota').upload(path, file, { upsert: true });
+      if (upErr) throw upErr;
+
+      const { data: { publicUrl } } = BANITAMHID.db.storage.from('foto-anggota').getPublicUrl(path);
+
+      await BANITAMHID.db.from('foto_anggota').insert({
+        anggota_id: anggotaId, url: publicUrl,
+        storage_path: path, tipe, keterangan: ket || null
+      });
+
+      if (tipe === 'profil') {
+        await BANITAMHID.db.from('anggota_keluarga').update({ foto_profil_url: publicUrl }).eq('id', anggotaId);
+      }
+
+      uploaded++;
+      progressBar.style.width = Math.round(uploaded / selectedFiles.length * 100) + '%';
+    } catch (err) {
+      errors.push(file.name + ': ' + err.message);
+    }
+  }
+
+  UI.setLoading(btn, false);
+  progressWrap.style.display = 'none';
+  progressBar.style.width = '0';
+
+  if (errors.length) {
+    alertEl.innerHTML = `<div class="alert alert-error">Gagal upload: ${errors.join('<br>')}</div>`;
+  } else {
+    BANITAMHID.Toast.success(`${uploaded} foto berhasil diupload!`);
+    UI.closeModal('modalUpload');
+    loadFoto();
+  }
+}
+
+async function hapusFoto(id, path) {
+  UI.confirm('Hapus foto ini dari galeri?', async () => {
+    try {
+      if (path) await BANITAMHID.db.storage.from('foto-anggota').remove([path]);
+      await BANITAMHID.db.from('foto_anggota').delete().eq('id', id);
+      BANITAMHID.Toast.success('Foto dihapus.');
+      loadFoto();
+    } catch (err) {
+      BANITAMHID.Toast.error('Gagal menghapus: ' + err.message);
+    }
+  }, 'Hapus');
+}
+</script>
+</body>
+</html>

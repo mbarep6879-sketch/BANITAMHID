@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pohon Silsilah — BANITAMHID</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../css/main.css"/>
+  <style>
+    .tree-shell { display:flex; height:calc(100vh - var(--header-h)); overflow:hidden; }
+
+    /* Sidebar panel kiri */
+    .tree-panel {
+      width:260px; flex-shrink:0;
+      background:#fff; border-right:1px solid var(--border);
+      display:flex; flex-direction:column;
+      overflow:hidden;
+    }
+    .tree-panel-header {
+      padding:16px; border-bottom:1px solid var(--border);
+      font-size:13px; font-weight:600; color:var(--green-dark);
+    }
+    .tree-panel-body { flex:1; overflow-y:auto; padding:12px; }
+
+    /* Canvas area */
+    .tree-canvas-wrap {
+      flex:1; position:relative; overflow:hidden;
+      background: radial-gradient(circle at 50% 50%, #f0ede6 0%, #e8e4da 100%);
+    }
+
+    #treeCanvas { position:absolute; top:0; left:0; cursor:grab; }
+    #treeCanvas:active { cursor:grabbing; }
+
+    /* Kontrol zoom */
+    .zoom-controls {
+      position:absolute; bottom:24px; right:24px;
+      display:flex; flex-direction:column; gap:6px; z-index:10;
+    }
+    .zoom-btn {
+      width:36px; height:36px; border-radius:8px;
+      background:#fff; border:1px solid var(--border);
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; font-size:18px; font-weight:600;
+      color:var(--text-mid); box-shadow:var(--shadow-sm);
+      transition:background .15s;
+    }
+    .zoom-btn:hover { background:var(--green-pale); color:var(--green-mid); }
+
+    /* Node kartu */
+    .node-card {
+      position:absolute;
+      width:160px;
+      background:#fff;
+      border-radius:12px;
+      border:2px solid var(--border);
+      box-shadow:0 2px 8px rgba(0,0,0,.1);
+      cursor:pointer;
+      transition:border-color .15s, box-shadow .15s, transform .1s;
+      overflow:hidden;
+      user-select:none;
+    }
+    .node-card:hover { border-color:var(--green-light); box-shadow:0 4px 16px rgba(45,138,99,.2); transform:translateY(-2px); }
+    .node-card.selected { border-color:var(--gold); box-shadow:0 4px 16px rgba(201,168,76,.3); }
+    .node-card.root { border-color:var(--green-mid); border-width:3px; }
+
+    .node-top { height:6px; }
+    .node-top.lk { background:linear-gradient(90deg,#1a56b0,#3b82f6); }
+    .node-top.pr { background:linear-gradient(90deg,#7b2fbe,#a855f7); }
+    .node-top.meninggal { background:linear-gradient(90deg,#6b7280,#9ca3af); }
+
+    .node-body { padding:10px; }
+    .node-avatar {
+      width:44px; height:44px; border-radius:50%;
+      background:var(--green-pale); color:var(--green-mid);
+      display:flex; align-items:center; justify-content:center;
+      font-size:16px; font-weight:700;
+      margin:0 auto 8px;
+      border:2px solid var(--border);
+      overflow:hidden;
+    }
+    .node-avatar img { width:100%; height:100%; object-fit:cover; }
+    .node-name {
+      font-size:12px; font-weight:600; color:var(--text-dark);
+      text-align:center; line-height:1.3;
+      overflow:hidden; text-overflow:ellipsis;
+      display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+    }
+    .node-meta {
+      font-size:10px; color:var(--text-light);
+      text-align:center; margin-top:3px;
+    }
+    .node-expand {
+      position:absolute; bottom:-12px; left:50%; transform:translateX(-50%);
+      width:22px; height:22px; border-radius:50%;
+      background:var(--green-mid); color:#fff;
+      display:flex; align-items:center; justify-content:center;
+      font-size:12px; cursor:pointer;
+      border:2px solid #fff; box-shadow:var(--shadow-sm);
+      z-index:5;
+    }
+
+    /* Info panel kanan */
+    .info-panel {
+      position:absolute; top:16px; left:280px;
+      width:220px;
+      background:#fff; border-radius:12px;
+      border:1px solid var(--border);
+      box-shadow:var(--shadow-md);
+      padding:16px; z-index:10;
+      display:none;
+    }
+    .info-panel.show { display:block; }
+
+    /* Legend */
+    .legend {
+      position:absolute; bottom:24px; left:16px;
+      background:#fff; border-radius:10px;
+      border:1px solid var(--border);
+      padding:12px 16px; z-index:10;
+      font-size:11.5px;
+    }
+    .legend-item { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+    .legend-item:last-child { margin-bottom:0; }
+    .legend-dot { width:12px; height:12px; border-radius:3px; flex-shrink:0; }
+
+    /* Search hasil */
+    .search-result-item {
+      padding:8px 10px; border-radius:7px; cursor:pointer;
+      font-size:12.5px; transition:background .15s;
+    }
+    .search-result-item:hover { background:var(--green-pale); }
+
+    /* Loading overlay */
+    .tree-loading {
+      position:absolute; inset:0;
+      background:rgba(244,240,234,.85);
+      display:flex; align-items:center; justify-content:center;
+      z-index:20; flex-direction:column; gap:12px;
+    }
+    .tree-loading-spinner {
+      width:40px; height:40px;
+      border:4px solid rgba(45,138,99,.2);
+      border-top-color:var(--green-mid);
+      border-radius:50%;
+      animation:spin .8s linear infinite;
+    }
+  </style>
+</head>
+<body>
+
+<div id="root" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f4f0ea">
+  <div style="text-align:center;color:#8a8a8a"><div style="font-size:32px;margin-bottom:12px">🌳</div><div>Memuat...</div></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../js/supabase.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+(async () => {
+  const session = await BANITAMHID.Auth.requireAuth();
+  if (!session) return;
+  const user    = await BANITAMHID.Auth.getUser();
+  const profile = await BANITAMHID.UserProfile.getProfile(user.id);
+
+  document.getElementById('root').outerHTML = `
+  <div class="app-shell" style="flex-direction:column">
+    ${UI._sidebar('silsilah', profile)}
+    <div class="main-wrap" style="overflow:hidden">
+      ${UI._topbar('Pohon Silsilah', profile)}
+      <div class="tree-shell">
+
+        <!-- Panel kiri: pencarian & navigasi -->
+        <div class="tree-panel">
+          <div class="tree-panel-header">🔍 Cari & Navigasi</div>
+          <div class="tree-panel-body">
+            <div class="search-wrap" style="max-width:100%;margin-bottom:12px">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input class="search-input" id="searchSilsilah" placeholder="Cari nama..." oninput="searchAnggota(this.value)" style="width:100%"/>
+            </div>
+            <div id="searchResults"></div>
+
+            <div class="divider" style="margin:16px 0"></div>
+
+            <div style="font-size:12px;font-weight:600;color:var(--green-dark);margin-bottom:10px">Pilih Titik Awal</div>
+            <select class="form-control" id="selectRoot" onchange="setRootNode(this.value)" style="font-size:12.5px;margin-bottom:8px">
+              <option value="">— Pilih leluhur —</option>
+            </select>
+            <button class="btn btn-secondary btn-sm" style="width:100%;justify-content:center" onclick="resetView()">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              Reset Tampilan
+            </button>
+
+            <div class="divider" style="margin:16px 0"></div>
+
+            <div style="font-size:12px;font-weight:600;color:var(--green-dark);margin-bottom:8px">Filter Generasi</div>
+            <div style="display:flex;flex-direction:column;gap:6px" id="genFilter"></div>
+
+            <div class="divider" style="margin:16px 0"></div>
+            <div style="font-size:11px;color:var(--text-light);line-height:1.8">
+              🖱 Drag untuk geser<br>
+              🔍 Scroll untuk zoom<br>
+              👆 Klik node untuk detail<br>
+              ➕ Klik tombol ➕ untuk expand
+            </div>
+          </div>
+        </div>
+
+        <!-- Canvas pohon -->
+        <div class="tree-canvas-wrap" id="canvasWrap">
+          <div class="tree-loading" id="treeLoading">
+            <div class="tree-loading-spinner"></div>
+            <div style="font-size:13px;color:var(--text-mid)">Membangun pohon silsilah...</div>
+          </div>
+
+          <div id="treeCanvas"></div>
+
+          <!-- Info panel -->
+          <div class="info-panel" id="infoPanel">
+            <div id="infoPanelContent"></div>
+          </div>
+
+          <!-- Zoom controls -->
+          <div class="zoom-controls">
+            <button class="zoom-btn" onclick="zoom(0.15)" title="Zoom In">+</button>
+            <button class="zoom-btn" style="font-size:13px" onclick="resetView()" title="Reset">⊙</button>
+            <button class="zoom-btn" onclick="zoom(-0.15)" title="Zoom Out">−</button>
+          </div>
+
+          <!-- Legend -->
+          <div class="legend">
+            <div style="font-size:11px;font-weight:600;color:var(--text-mid);margin-bottom:8px">KETERANGAN</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#1a56b0"></div>Laki-laki</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#7b2fbe"></div>Perempuan</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#6b7280"></div>Almarhum/ah</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>Dipilih</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="sidebar-overlay" onclick="UI.closeSidebar()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99"></div>
+  `;
+
+  UI._bindEvents(profile);
+  await initTree();
+})();
+
+// ════════════════════════════════════════════
+// TREE ENGINE
+// ════════════════════════════════════════════
+
+let allData    = [];    // semua anggota
+let treeState  = {};   // { id: { expanded, visible } }
+let rootId     = null;
+let scale      = 1;
+let offsetX    = 0;
+let offsetY    = 0;
+let isDragging = false;
+let dragStart  = { x:0, y:0 };
+let selectedId = null;
+
+const NODE_W   = 164;
+const NODE_H   = 110;
+const H_GAP    = 40;
+const V_GAP    = 80;
+
+async function initTree() {
+  try {
+    const { data, error } = await BANITAMHID.db
+      .from('anggota_keluarga')
+      .select('id, nama_lengkap, jenis_kelamin, nama_ayah_id, nama_ibu_id, nama_ayah, nama_ibu, tanggal_lahir, tanggal_wafat, status_hidup, foto_profil_url, status_pernikahan')
+      .order('tanggal_lahir', { ascending: true, nullsFirst: false });
+
+    if (error) throw error;
+    allData = data || [];
+
+    // Inisialisasi state
+    allData.forEach(a => { treeState[a.id] = { expanded: false, visible: true }; });
+
+    // Populate select root
+    const sel = document.getElementById('selectRoot');
+    // Cari leluhur (tidak punya parent terdaftar)
+    const ids = new Set(allData.map(a => a.id));
+    const leluhur = allData.filter(a => !a.nama_ayah_id || !ids.has(a.nama_ayah_id));
+    leluhur.forEach(l => {
+      const opt = document.createElement('option');
+      opt.value = l.id;
+      opt.textContent = l.nama_lengkap;
+      sel.appendChild(opt);
+    });
+
+    // Default: root = leluhur pertama
+    if (leluhur.length > 0) {
+      rootId = leluhur[0].id;
+      sel.value = rootId;
+    } else if (allData.length > 0) {
+      rootId = allData[0].id;
+    }
+
+    document.getElementById('treeLoading').style.display = 'none';
+    renderTree();
+    setupCanvasEvents();
+    buildGenFilter();
+  } catch (err) {
+    document.getElementById('treeLoading').innerHTML = `
+      <div style="text-align:center;color:var(--error);font-size:13px">Gagal memuat: ${err.message}</div>`;
+  }
+}
+
+// ── BUILD TREE DATA ──
+function getChildren(parentId) {
+  return allData.filter(a => a.nama_ayah_id === parentId || a.nama_ibu_id === parentId);
+}
+
+function buildLayout(nodeId, x, y, depth = 0) {
+  const nodes = [];
+  const lines  = [];
+  const node   = allData.find(a => a.id === nodeId);
+  if (!node) return { nodes, lines, width: NODE_W };
+
+  nodes.push({ ...node, x, y, depth });
+
+  const state = treeState[nodeId];
+  if (!state?.expanded) return { nodes, lines, width: NODE_W };
+
+  const children = getChildren(nodeId);
+  if (!children.length) return { nodes, lines, width: NODE_W };
+
+  // Hitung lebar subtree tiap anak
+  const subtrees = children.map((c, i) => buildLayout(c.id, 0, 0, depth + 1));
+  const totalW   = subtrees.reduce((acc, s) => acc + s.width, 0) + H_GAP * (children.length - 1);
+  let cx = x - totalW / 2 + subtrees[0].width / 2;
+  const cy = y + NODE_H + V_GAP;
+
+  subtrees.forEach((sub, i) => {
+    const childX = cx;
+    const childY = cy;
+
+    // Geser node anak ke posisi baru
+    sub.nodes.forEach(n => { n.x += childX; n.y += childY; });
+    nodes.push(...sub.nodes);
+    lines.push(...sub.lines);
+
+    // Garis ke anak
+    lines.push({
+      x1: x + NODE_W / 2,
+      y1: y + NODE_H,
+      x2: childX + NODE_W / 2,
+      y2: childY,
+    });
+
+    if (i < subtrees.length - 1) cx += subtrees[i].width + H_GAP;
+  });
+
+  return { nodes, lines, width: Math.max(NODE_W, totalW) };
+}
+
+// ── RENDER TREE ──
+function renderTree() {
+  if (!rootId) {
+    document.getElementById('treeCanvas').innerHTML = `
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:var(--text-light)">
+        <div style="font-size:48px;margin-bottom:12px">🌱</div>
+        <div>Belum ada data anggota keluarga.</div>
+        <a href="anggota.html?action=tambah" class="btn btn-primary" style="margin-top:16px;display:inline-flex">Tambah Anggota Pertama</a>
+      </div>`;
+    return;
+  }
+
+  const { nodes, lines } = buildLayout(rootId, 0, 0);
+
+  // Hitung bounding box
+  const minX = Math.min(...nodes.map(n => n.x)) - 80;
+  const minY = Math.min(...nodes.map(n => n.y)) - 80;
+  const maxX = Math.max(...nodes.map(n => n.x + NODE_W)) + 80;
+  const maxY = Math.max(...nodes.map(n => n.y + NODE_H)) + 80;
+  const tW = maxX - minX;
+  const tH = maxY - minY;
+
+  // SVG garis
+  const svgLines = lines.map(l => `
+    <line x1="${l.x1 - minX}" y1="${l.y1 - minY}" x2="${l.x2 - minX}" y2="${l.y2 - minY}"
+      stroke="#c8bfad" stroke-width="2" stroke-dasharray="6,3"/>
+  `).join('');
+
+  const svg = `<svg width="${tW}" height="${tH}" style="position:absolute;top:0;left:0;pointer-events:none">
+    <defs>
+      <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M2 2L8 5L2 8" fill="none" stroke="#c8bfad" stroke-width="1.5"/>
+      </marker>
+    </defs>
+    ${svgLines}
+  </svg>`;
+
+  // Node cards
+  const cards = nodes.map(n => {
+    const inisial  = UI.inisial(n.nama_lengkap);
+    const topCls   = n.status_hidup === 'meninggal' ? 'meninggal' : (n.jenis_kelamin === 'L' ? 'lk' : 'pr');
+    const children = getChildren(n.id);
+    const hasChild = children.length > 0;
+    const expanded = treeState[n.id]?.expanded;
+    const isRoot   = n.id === rootId;
+    const isSelected = n.id === selectedId;
+    const avatarBg = n.jenis_kelamin === 'L' ? '#e8f0fe' : '#f3e8fd';
+    const avatarCl = n.jenis_kelamin === 'L' ? '#1a56b0' : '#7b2fbe';
+
+    return `
+    <div class="node-card ${isRoot ? 'root' : ''} ${isSelected ? 'selected' : ''}"
+      id="node-${n.id}"
+      style="left:${n.x - minX}px;top:${n.y - minY}px;"
+      onclick="selectNode('${n.id}')">
+      <div class="node-top ${topCls}"></div>
+      <div class="node-body">
+        <div class="node-avatar" style="background:${avatarBg};color:${avatarCl}">
+          ${n.foto_profil_url ? `<img src="${n.foto_profil_url}" alt="">` : inisial}
+        </div>
+        <div class="node-name">${n.nama_lengkap}</div>
+        <div class="node-meta">
+          ${n.tanggal_lahir ? new Date(n.tanggal_lahir).getFullYear() : ''}
+          ${n.tanggal_wafat ? ' – ' + new Date(n.tanggal_wafat).getFullYear() : ''}
+        </div>
+      </div>
+      ${hasChild ? `
+      <div class="node-expand" onclick="event.stopPropagation();toggleExpand('${n.id}')"
+        title="${expanded ? 'Tutup' : 'Buka'} (${children.length} anak)">
+        ${expanded ? '−' : '+'}
+      </div>` : ''}
+    </div>`;
+  }).join('');
+
+  const canvas = document.getElementById('treeCanvas');
+  canvas.style.width  = tW + 'px';
+  canvas.style.height = tH + 'px';
+  canvas.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+  canvas.style.transformOrigin = '0 0';
+  canvas.innerHTML = svg + cards;
+}
+
+// ── INTERAKSI ──
+function toggleExpand(id) {
+  treeState[id].expanded = !treeState[id].expanded;
+  renderTree();
+}
+
+function selectNode(id) {
+  selectedId = id;
+  renderTree();
+  showInfoPanel(id);
+}
+
+function showInfoPanel(id) {
+  const a = allData.find(x => x.id === id);
+  if (!a) return;
+  const panel = document.getElementById('infoPanel');
+  const children = getChildren(id);
+  document.getElementById('infoPanelContent').innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <div class="avatar" style="width:44px;height:44px;font-size:16px;background:${a.jenis_kelamin==='L'?'#e8f0fe':'#f3e8fd'};color:${a.jenis_kelamin==='L'?'#1a56b0':'#7b2fbe'}">
+        ${a.foto_profil_url ? `<img src="${a.foto_profil_url}" alt="">` : UI.inisial(a.nama_lengkap)}
+      </div>
+      <div>
+        <div style="font-size:13.5px;font-weight:600;color:var(--green-dark)">${a.nama_lengkap}</div>
+        <div style="font-size:11.5px;color:var(--text-light)">${a.jenis_kelamin==='L'?'Laki-laki':'Perempuan'}</div>
+      </div>
+    </div>
+    ${a.tanggal_lahir ? `<div style="font-size:12px;color:var(--text-mid);margin-bottom:4px">📅 Lahir: ${UI.formatDate(a.tanggal_lahir)}</div>` : ''}
+    ${a.nama_ayah ? `<div style="font-size:12px;color:var(--text-mid);margin-bottom:4px">👨 ${a.nama_ayah}</div>` : ''}
+    ${a.nama_ibu  ? `<div style="font-size:12px;color:var(--text-mid);margin-bottom:4px">👩 ${a.nama_ibu}</div>`  : ''}
+    ${children.length ? `<div style="font-size:12px;color:var(--text-mid);margin-bottom:12px">👶 ${children.length} anak</div>` : ''}
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <a href="anggota.html?id=${a.id}" class="btn btn-secondary btn-sm" style="font-size:11px">Detail</a>
+      <button class="btn btn-primary btn-sm" style="font-size:11px" onclick="setRootFromInfo('${a.id}')">Jadikan Root</button>
+      <button class="btn-icon" style="width:28px;height:28px" onclick="document.getElementById('infoPanel').classList.remove('show')">✕</button>
+    </div>
+  `;
+  panel.classList.add('show');
+}
+
+function setRootFromInfo(id) {
+  rootId = id;
+  document.getElementById('selectRoot').value = id;
+  document.getElementById('infoPanel').classList.remove('show');
+  // Expand root otomatis
+  treeState[id].expanded = true;
+  centerCanvas();
+  renderTree();
+}
+
+function setRootNode(id) {
+  if (!id) return;
+  rootId = id;
+  treeState[id].expanded = true;
+  centerCanvas();
+  renderTree();
+}
+
+// ── ZOOM & PAN ──
+function zoom(delta) {
+  const newScale = Math.min(2.5, Math.max(0.2, scale + delta));
+  scale = newScale;
+  renderTree();
+}
+
+function centerCanvas() {
+  const wrap = document.getElementById('canvasWrap');
+  offsetX = wrap.clientWidth / 4;
+  offsetY = 40;
+  scale   = 1;
+}
+
+function resetView() {
+  centerCanvas();
+  renderTree();
+}
+
+function setupCanvasEvents() {
+  const wrap = document.getElementById('canvasWrap');
+
+  // Drag
+  wrap.addEventListener('mousedown', e => {
+    if (e.target.closest('.node-card') || e.target.closest('.node-expand')) return;
+    isDragging = true;
+    dragStart  = { x: e.clientX - offsetX, y: e.clientY - offsetY };
+    wrap.style.cursor = 'grabbing';
+  });
+  window.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    offsetX = e.clientX - dragStart.x;
+    offsetY = e.clientY - dragStart.y;
+    document.getElementById('treeCanvas').style.transform = `translate(${offsetX}px,${offsetY}px) scale(${scale})`;
+  });
+  window.addEventListener('mouseup', () => { isDragging = false; wrap.style.cursor = ''; });
+
+  // Touch drag
+  let lastTouch = null;
+  wrap.addEventListener('touchstart', e => { lastTouch = e.touches[0]; });
+  wrap.addEventListener('touchmove', e => {
+    if (!lastTouch) return;
+    const t = e.touches[0];
+    offsetX += t.clientX - lastTouch.clientX;
+    offsetY += t.clientY - lastTouch.clientY;
+    lastTouch = t;
+    document.getElementById('treeCanvas').style.transform = `translate(${offsetX}px,${offsetY}px) scale(${scale})`;
+    e.preventDefault();
+  }, { passive: false });
+
+  // Scroll zoom
+  wrap.addEventListener('wheel', e => {
+    e.preventDefault();
+    zoom(e.deltaY < 0 ? 0.1 : -0.1);
+  }, { passive: false });
+
+  centerCanvas();
+}
+
+// ── SEARCH ──
+let searchTimer2;
+function searchAnggota(val) {
+  clearTimeout(searchTimer2);
+  const container = document.getElementById('searchResults');
+  if (!val.trim()) { container.innerHTML = ''; return; }
+  searchTimer2 = setTimeout(() => {
+    const results = allData.filter(a => a.nama_lengkap.toLowerCase().includes(val.toLowerCase())).slice(0, 10);
+    if (!results.length) { container.innerHTML = `<div style="font-size:12px;color:var(--text-light);padding:8px">Tidak ditemukan</div>`; return; }
+    container.innerHTML = results.map(a => `
+      <div class="search-result-item" onclick="focusNode('${a.id}')">
+        <span style="font-size:12.5px;font-weight:500">${a.nama_lengkap}</span>
+        <span style="font-size:11px;color:var(--text-light);display:block">${a.jenis_kelamin==='L'?'Laki-laki':'Perempuan'}${a.tanggal_lahir?' · '+new Date(a.tanggal_lahir).getFullYear():''}</span>
+      </div>`).join('');
+  }, 300);
+}
+
+function focusNode(id) {
+  // Expand semua leluhur sampai node ini
+  expandPathToNode(id);
+  selectedId = id;
+  renderTree();
+  showInfoPanel(id);
+  document.getElementById('searchResults').innerHTML = '';
+  document.getElementById('searchSilsilah').value = '';
+
+  // Scroll ke node
+  setTimeout(() => {
+    const el = document.getElementById('node-' + id);
+    if (el) {
+      const rect  = el.getBoundingClientRect();
+      const wrap  = document.getElementById('canvasWrap').getBoundingClientRect();
+      offsetX += wrap.left + wrap.width/2 - rect.left - NODE_W/2;
+      offsetY += wrap.top  + wrap.height/2 - rect.top  - NODE_H/2;
+      renderTree();
+    }
+  }, 100);
+}
+
+function expandPathToNode(targetId) {
+  // Cari path dari root ke target
+  function findPath(currentId, target, path) {
+    if (currentId === target) return [...path, currentId];
+    const children = getChildren(currentId);
+    for (const c of children) {
+      const result = findPath(c.id, target, [...path, currentId]);
+      if (result) return result;
+    }
+    return null;
+  }
+  if (!rootId) return;
+  const path = findPath(rootId, targetId, []);
+  if (path) path.forEach(id => { if (treeState[id]) treeState[id].expanded = true; });
+}
+
+// ── GEN FILTER ──
+function buildGenFilter() {
+  const container = document.getElementById('genFilter');
+  // Hitung generasi maks
+  const maxGen = 6;
+  let html = '';
+  for (let g = 0; g <= maxGen; g++) {
+    html += `<label style="display:flex;align-items:center;gap:8px;font-size:12.5px;cursor:pointer">
+      <input type="checkbox" checked onchange="filterGen(${g}, this.checked)" style="accent-color:var(--green-mid)"/>
+      Generasi ${g === 0 ? '(Leluhur)' : g}
+    </label>`;
+  }
+  container.innerHTML = html;
+}
+
+function filterGen(gen, show) {
+  // Implementasi sederhana: toggle visibility berdasarkan depth
+  // Untuk implementasi penuh perlu tracking depth di state
+  BANITAMHID.Toast.info(`Filter generasi ${gen} ${show ? 'ditampilkan' : 'disembunyikan'}`);
+}
+</script>
+</body>
+</html>

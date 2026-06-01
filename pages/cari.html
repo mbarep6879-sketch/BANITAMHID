@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cari Data — BANITAMHID</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../css/main.css"/>
+  <style>
+    /* ── SEARCH HERO ── */
+    .search-hero {
+      background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-mid) 100%);
+      border-radius: var(--radius-lg);
+      padding: 32px 28px 28px;
+      margin-bottom: 24px;
+      color: #fff;
+    }
+
+    .search-hero h2 {
+      font-family: 'Amiri', serif;
+      font-size: 22px;
+      color: var(--gold-light);
+      margin-bottom: 6px;
+    }
+
+    .search-hero p {
+      font-size: 13px;
+      color: rgba(255,255,255,.6);
+      margin-bottom: 20px;
+    }
+
+    .search-big-wrap {
+      position: relative;
+    }
+
+    .search-big-wrap svg {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 22px; height: 22px;
+      color: rgba(255,255,255,.5);
+      pointer-events: none;
+    }
+
+    .search-big-input {
+      width: 100%;
+      padding: 16px 120px 16px 52px;
+      background: rgba(255,255,255,.12);
+      border: 1.5px solid rgba(255,255,255,.2);
+      border-radius: 12px;
+      font-size: 16px;
+      color: #fff;
+      font-family: inherit;
+      outline: none;
+      transition: background .2s, border-color .2s;
+    }
+
+    .search-big-input::placeholder { color: rgba(255,255,255,.4); }
+    .search-big-input:focus {
+      background: rgba(255,255,255,.18);
+      border-color: var(--gold);
+    }
+
+    .btn-cari-besar {
+      position: absolute;
+      right: 6px;
+      top: 6px;
+      bottom: 6px;
+      padding: 0 20px;
+      background: var(--gold);
+      color: var(--green-dark);
+      border: none;
+      border-radius: 9px;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background .2s;
+      white-space: nowrap;
+    }
+    .btn-cari-besar:hover { background: var(--gold-light); }
+
+    /* Filter tabs */
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .filter-chip {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1.5px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.08);
+      color: rgba(255,255,255,.7);
+      font-size: 12.5px;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: inherit;
+    }
+
+    .filter-chip.active {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: var(--green-dark);
+      font-weight: 600;
+    }
+
+    /* ── RESULT SECTION ── */
+    .result-section {
+      margin-bottom: 24px;
+    }
+
+    .result-section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .result-section-header h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--green-dark);
+    }
+
+    .result-count {
+      background: var(--green-pale);
+      color: var(--green-mid);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+
+    /* Result card anggota */
+    .result-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      transition: border-color .15s, box-shadow .15s, transform .1s;
+      margin-bottom: 8px;
+    }
+
+    .result-card:hover {
+      border-color: var(--green-light);
+      box-shadow: 0 2px 12px rgba(45,138,99,.12);
+      transform: translateY(-1px);
+    }
+
+    .result-card:active { transform: translateY(0); }
+
+    .result-avatar {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .result-info { flex: 1; min-width: 0; }
+
+    .result-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--green-dark);
+      margin-bottom: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .result-meta {
+      font-size: 12px;
+      color: var(--text-light);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .result-meta span {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .result-arrow {
+      color: var(--text-light);
+      flex-shrink: 0;
+    }
+
+    /* Highlight match */
+    mark {
+      background: rgba(201,168,76,.25);
+      color: var(--green-dark);
+      border-radius: 2px;
+      padding: 0 2px;
+      font-weight: inherit;
+    }
+
+    /* Empty & loading states */
+    .search-empty {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--text-light);
+    }
+
+    .search-empty .empty-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .search-empty h3 {
+      font-size: 15px;
+      color: var(--text-mid);
+      margin-bottom: 6px;
+    }
+
+    .search-empty p { font-size: 13px; }
+
+    .search-initial {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .search-initial .init-icon {
+      font-size: 56px;
+      margin-bottom: 16px;
+      opacity: .6;
+    }
+
+    .search-initial h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--green-dark);
+      margin-bottom: 8px;
+    }
+
+    .search-initial p {
+      font-size: 13px;
+      color: var(--text-light);
+      max-width: 320px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* Suggestions */
+    .search-suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .suggestion-chip {
+      padding: 8px 16px;
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 13px;
+      color: var(--green-mid);
+      cursor: pointer;
+      transition: background .15s;
+      font-family: inherit;
+    }
+
+    .suggestion-chip:hover { background: var(--green-pale); }
+
+    /* Quick edit button */
+    .btn-quick-edit {
+      padding: 6px 12px;
+      background: var(--green-pale);
+      color: var(--green-mid);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .15s;
+      font-family: inherit;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .btn-quick-edit:hover { background: var(--green-mid); color: #fff; }
+
+    /* Modal detail — reuse dari anggota.html */
+    @media (max-width: 600px) {
+      .search-big-input {
+        padding-right: 90px;
+        font-size: 16px;
+      }
+      .btn-cari-besar {
+        padding: 0 14px;
+        font-size: 13px;
+      }
+      .search-hero {
+        padding: 20px 16px;
+      }
+      .result-card {
+        padding: 12px 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div id="root" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f4f0ea">
+  <div style="text-align:center;color:#8a8a8a"><div style="font-size:32px;margin-bottom:12px">🌳</div><div>Memuat...</div></div>
+</div>
+
+<!-- MODAL: Detail Anggota (shared from anggota.html) -->
+<div class="modal-backdrop" id="modalDetail">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <h3>Detail Anggota</h3>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-secondary btn-sm" id="btnEditDetail" onclick="goEdit()">✏️ Edit Data</button>
+        <button class="btn-icon" onclick="UI.closeModal('modalDetail')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="modal-body" id="detailContent">Memuat...</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../js/supabase.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+// ── STATE ──
+let searchKeyword = '';
+let activeFilter  = 'semua';  // semua | anggota | pernikahan | kelahiran | kematian
+let isAdmin       = false;
+let currentDetailId = null;
+let searchTimer;
+const MAX_RESULTS  = 30;
+
+// ── INIT ──
+(async () => {
+  const session = await BANITAMHID.Auth.requireAuth();
+  if (!session) return;
+  const user    = await BANITAMHID.Auth.getUser();
+  const profile = await BANITAMHID.UserProfile.getProfile(user.id);
+  isAdmin       = await BANITAMHID.UserProfile.isAdmin();
+
+  document.getElementById('root').outerHTML = `
+  <div class="app-shell">
+    ${UI._sidebar('cari', profile)}
+    <div class="main-wrap">
+      ${UI._topbar('Cari Data', profile)}
+      <div class="page-content">
+
+        <!-- Hero Search Box -->
+        <div class="search-hero">
+          <h2>🔍 Cari Data Keluarga</h2>
+          <p>Temukan anggota, pernikahan, kelahiran, dan kematian dalam satu tempat</p>
+          <div class="search-big-wrap">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input
+              class="search-big-input"
+              id="searchBig"
+              type="text"
+              placeholder="Ketik nama, tempat lahir, alamat..."
+              autocomplete="off"
+              oninput="onInput(this.value)"
+              onkeydown="if(event.key==='Enter') doSearch()"
+              autofocus
+            />
+            <button class="btn-cari-besar" onclick="doSearch()">Cari</button>
+          </div>
+
+          <!-- Filter Kategori -->
+          <div class="filter-tabs" id="filterTabs">
+            <button class="filter-chip active" data-filter="semua" onclick="setFilter('semua')">Semua</button>
+            <button class="filter-chip" data-filter="anggota" onclick="setFilter('anggota')">👤 Anggota</button>
+            <button class="filter-chip" data-filter="pernikahan" onclick="setFilter('pernikahan')">💍 Pernikahan</button>
+            <button class="filter-chip" data-filter="kelahiran" onclick="setFilter('kelahiran')">👶 Kelahiran</button>
+            <button class="filter-chip" data-filter="kematian" onclick="setFilter('kematian')">🌙 Kematian</button>
+          </div>
+        </div>
+
+        <!-- Hasil Pencarian -->
+        <div id="resultArea">
+          ${renderInitialState()}
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <div class="sidebar-overlay" onclick="UI.closeSidebar()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99"></div>
+  `;
+
+  UI._bindEvents(profile);
+
+  // Cek jika ada query dari URL
+  const params = new URLSearchParams(location.search);
+  const q = params.get('q');
+  if (q) {
+    document.getElementById('searchBig').value = q;
+    searchKeyword = q;
+    doSearch();
+  }
+})();
+
+// ── FILTER ──
+function setFilter(f) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.filter === f);
+  });
+  if (searchKeyword) doSearch();
+}
+
+// ── INPUT DEBOUNCE ──
+function onInput(val) {
+  clearTimeout(searchTimer);
+  if (!val.trim()) {
+    searchKeyword = '';
+    document.getElementById('resultArea').innerHTML = renderInitialState();
+    return;
+  }
+  searchTimer = setTimeout(() => {
+    searchKeyword = val.trim();
+    doSearch();
+  }, 450);
+}
+
+// ── SEARCH ──
+async function doSearch() {
+  const kw = (document.getElementById('searchBig')?.value || searchKeyword).trim();
+  if (!kw) return;
+  searchKeyword = kw;
+
+  const resultArea = document.getElementById('resultArea');
+  resultArea.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${Array(4).fill('').map(() => `
+        <div class="result-card" style="cursor:default">
+          <div class="skeleton" style="width:44px;height:44px;border-radius:12px;flex-shrink:0"></div>
+          <div style="flex:1">
+            <div class="skeleton" style="height:15px;width:55%;margin-bottom:8px"></div>
+            <div class="skeleton" style="height:12px;width:75%"></div>
+          </div>
+        </div>`).join('')}
+    </div>`;
+
+  try {
+    const results = await fetchAll(kw);
+    renderResults(results, kw);
+  } catch (err) {
+    resultArea.innerHTML = `<div class="alert alert-error" style="margin:0">Gagal mencari: ${err.message}</div>`;
+  }
+}
+
+// ── FETCH DATA ──
+async function fetchAll(kw) {
+  const like = `%${kw}%`;
+  const results = { anggota: [], pernikahan: [], kelahiran: [], kematian: [] };
+
+  const searches = [];
+
+  if (activeFilter === 'semua' || activeFilter === 'anggota') {
+    searches.push(
+      BANITAMHID.db
+        .from('anggota_keluarga')
+        .select('id, nama_lengkap, jenis_kelamin, tanggal_lahir, tempat_lahir, nama_ayah, nama_ibu, status_hidup, nomor_hp, foto_profil_url')
+        .or(`nama_lengkap.ilike.${like},nama_ayah.ilike.${like},nama_ibu.ilike.${like},tempat_lahir.ilike.${like},alamat.ilike.${like}`)
+        .order('nama_lengkap')
+        .limit(MAX_RESULTS)
+        .then(({ data }) => { results.anggota = data || []; })
+    );
+  }
+
+  if (activeFilter === 'semua' || activeFilter === 'pernikahan') {
+    searches.push(
+      BANITAMHID.db
+        .from('pernikahan_anggota')
+        .select('id, anggota_id, nama_pasangan, tanggal_menikah, status, anggota:anggota_keluarga(id, nama_lengkap)')
+        .ilike('nama_pasangan', like)
+        .limit(MAX_RESULTS)
+        .then(({ data }) => { results.pernikahan = data || []; })
+    );
+  }
+
+  if (activeFilter === 'semua' || activeFilter === 'kelahiran') {
+    searches.push(
+      BANITAMHID.db
+        .from('anggota_keluarga')
+        .select('id, nama_lengkap, tanggal_lahir, tempat_lahir, nama_ayah, nama_ibu, jenis_kelamin')
+        .ilike('nama_lengkap', like)
+        .not('tanggal_lahir', 'is', null)
+        .order('tanggal_lahir', { ascending: false })
+        .limit(20)
+        .then(({ data }) => { results.kelahiran = data || []; })
+    );
+  }
+
+  if (activeFilter === 'semua' || activeFilter === 'kematian') {
+    searches.push(
+      BANITAMHID.db
+        .from('anggota_keluarga')
+        .select('id, nama_lengkap, tanggal_wafat, lokasi_makam, jenis_kelamin')
+        .ilike('nama_lengkap', like)
+        .eq('status_hidup', 'meninggal')
+        .limit(20)
+        .then(({ data }) => { results.kematian = data || []; })
+    );
+  }
+
+  await Promise.all(searches);
+  return results;
+}
+
+// ── RENDER RESULTS ──
+function renderResults(results, kw) {
+  const resultArea = document.getElementById('resultArea');
+  const total = results.anggota.length + results.pernikahan.length +
+                results.kelahiran.length + results.kematian.length;
+
+  if (total === 0) {
+    resultArea.innerHTML = `
+      <div class="search-empty">
+        <div class="empty-icon">🔍</div>
+        <h3>Tidak ditemukan hasil untuk "<em>${esc(kw)}</em>"</h3>
+        <p>Coba kata kunci lain, atau periksa ejaan nama.</p>
+        <div class="search-suggestions" style="margin-top:16px">
+          <button class="suggestion-chip" onclick="clearSearch()">Hapus pencarian</button>
+        </div>
+      </div>`;
+    return;
+  }
+
+  let html = `<div style="font-size:13px;color:var(--text-light);margin-bottom:16px">
+    Ditemukan <strong style="color:var(--green-dark)">${total}</strong> hasil untuk "<em>${esc(kw)}</em>"
+  </div>`;
+
+  // ── ANGGOTA ──
+  if (results.anggota.length) {
+    html += `
+      <div class="result-section">
+        <div class="result-section-header">
+          <span>👤</span>
+          <h3>Anggota Keluarga</h3>
+          <span class="result-count">${results.anggota.length}</span>
+        </div>
+        ${results.anggota.map(a => `
+          <div class="result-card" onclick="showDetail('${a.id}')">
+            <div class="result-avatar" style="background:${a.jenis_kelamin==='L'?'#e8f0fe':'#f3e8fd'};color:${a.jenis_kelamin==='L'?'#1a56b0':'#7b2fbe'}">
+              ${a.foto_profil_url
+                ? `<img src="${a.foto_profil_url}" alt="" style="width:44px;height:44px;border-radius:12px;object-fit:cover">`
+                : UI.inisial(a.nama_lengkap)}
+            </div>
+            <div class="result-info">
+              <div class="result-name">${highlight(a.nama_lengkap, kw)}</div>
+              <div class="result-meta">
+                <span>${a.jenis_kelamin==='L'?'♂ Laki-laki':'♀ Perempuan'}</span>
+                ${a.tempat_lahir ? `<span>📍 ${highlight(a.tempat_lahir, kw)}</span>` : ''}
+                ${a.tanggal_lahir ? `<span>🎂 ${UI.formatDate(a.tanggal_lahir)}</span>` : ''}
+                ${a.nama_ayah ? `<span>👨 ${highlight(a.nama_ayah, kw)}</span>` : ''}
+                <span class="badge ${a.status_hidup==='hidup'?'badge-green':'badge-gray'}" style="font-size:10px">${a.status_hidup==='hidup'?'Hidup':'Almarhum'}</span>
+              </div>
+            </div>
+            ${isAdmin ? `<button class="btn-quick-edit" onclick="event.stopPropagation();goEditAnggota('${a.id}')">✏️ Edit</button>` : ''}
+            <svg class="result-arrow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>`).join('')}
+      </div>`;
+  }
+
+  // ── PERNIKAHAN ──
+  if (results.pernikahan.length) {
+    html += `
+      <div class="result-section">
+        <div class="result-section-header">
+          <span>💍</span>
+          <h3>Pernikahan</h3>
+          <span class="result-count">${results.pernikahan.length}</span>
+        </div>
+        ${results.pernikahan.map(p => `
+          <div class="result-card" onclick="${p.anggota?.id ? `showDetail('${p.anggota.id}')` : ''}">
+            <div class="result-avatar" style="background:#fdf0ef;color:#c0392b;font-size:22px">💍</div>
+            <div class="result-info">
+              <div class="result-name">${highlight(p.nama_pasangan, kw)}</div>
+              <div class="result-meta">
+                <span>Pasangan: ${p.anggota?.nama_lengkap || '—'}</span>
+                ${p.tanggal_menikah ? `<span>📅 ${UI.formatDate(p.tanggal_menikah)}</span>` : ''}
+                <span class="badge ${p.status==='aktif'?'badge-green':'badge-gray'}" style="font-size:10px">${{aktif:'Aktif',cerai:'Cerai',meninggal:'Pasangan Meninggal'}[p.status]||p.status}</span>
+              </div>
+            </div>
+            <svg class="result-arrow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>`).join('')}
+      </div>`;
+  }
+
+  // ── KELAHIRAN ──
+  if (results.kelahiran.length && (activeFilter === 'semua' || activeFilter === 'kelahiran')) {
+    html += `
+      <div class="result-section">
+        <div class="result-section-header">
+          <span>👶</span>
+          <h3>Data Kelahiran</h3>
+          <span class="result-count">${results.kelahiran.length}</span>
+        </div>
+        ${results.kelahiran.map(a => `
+          <div class="result-card" onclick="showDetail('${a.id}')">
+            <div class="result-avatar" style="background:#e8f5ef;color:#1a5c42;font-size:22px">👶</div>
+            <div class="result-info">
+              <div class="result-name">${highlight(a.nama_lengkap, kw)}</div>
+              <div class="result-meta">
+                <span>📅 Lahir: ${UI.formatDate(a.tanggal_lahir)}</span>
+                ${a.tempat_lahir ? `<span>📍 ${a.tempat_lahir}</span>` : ''}
+                ${a.nama_ayah ? `<span>👨 ${a.nama_ayah}</span>` : ''}
+                ${a.nama_ibu  ? `<span>👩 ${a.nama_ibu}</span>` : ''}
+              </div>
+            </div>
+            ${isAdmin ? `<button class="btn-quick-edit" onclick="event.stopPropagation();goEditAnggota('${a.id}')">✏️ Edit</button>` : ''}
+            <svg class="result-arrow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>`).join('')}
+      </div>`;
+  }
+
+  // ── KEMATIAN ──
+  if (results.kematian.length && (activeFilter === 'semua' || activeFilter === 'kematian')) {
+    html += `
+      <div class="result-section">
+        <div class="result-section-header">
+          <span>🌙</span>
+          <h3>Data Kematian</h3>
+          <span class="result-count">${results.kematian.length}</span>
+        </div>
+        ${results.kematian.map(a => `
+          <div class="result-card" onclick="showDetail('${a.id}')">
+            <div class="result-avatar" style="background:#f5f5f5;color:#666;font-size:22px">🌙</div>
+            <div class="result-info">
+              <div class="result-name">${highlight(a.nama_lengkap, kw)}</div>
+              <div class="result-meta">
+                ${a.tanggal_wafat ? `<span>📅 Wafat: ${UI.formatDate(a.tanggal_wafat)}</span>` : ''}
+                ${a.lokasi_makam  ? `<span>📍 ${a.lokasi_makam}</span>` : ''}
+                <span class="badge badge-gray" style="font-size:10px">Almarhum/ah</span>
+              </div>
+            </div>
+            ${isAdmin ? `<button class="btn-quick-edit" onclick="event.stopPropagation();goEditAnggota('${a.id}')">✏️ Edit</button>` : ''}
+            <svg class="result-arrow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>`).join('')}
+      </div>`;
+  }
+
+  resultArea.innerHTML = html;
+}
+
+// ── INITIAL STATE ──
+function renderInitialState() {
+  return `
+    <div class="search-initial">
+      <div class="init-icon">🌳</div>
+      <h3>Cari Siapa Hari Ini?</h3>
+      <p>Masukkan nama, tempat lahir, atau alamat untuk menemukan data anggota keluarga Bani Tamhid</p>
+      <div class="search-suggestions">
+        <button class="suggestion-chip" onclick="quickSearch('Ahmad')">Ahmad</button>
+        <button class="suggestion-chip" onclick="quickSearch('Muhammad')">Muhammad</button>
+        <button class="suggestion-chip" onclick="quickSearch('Siti')">Siti</button>
+        <button class="suggestion-chip" onclick="quickSearch('Abdullah')">Abdullah</button>
+      </div>
+    </div>`;
+}
+
+function quickSearch(q) {
+  document.getElementById('searchBig').value = q;
+  searchKeyword = q;
+  doSearch();
+}
+
+function clearSearch() {
+  document.getElementById('searchBig').value = '';
+  searchKeyword = '';
+  document.getElementById('resultArea').innerHTML = renderInitialState();
+}
+
+// ── DETAIL MODAL ──
+async function showDetail(id) {
+  currentDetailId = id;
+  UI.openModal('modalDetail');
+  const detailEl = document.getElementById('detailContent');
+  detailEl.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-light)">Memuat data...</div>`;
+  if (!isAdmin) document.getElementById('btnEditDetail').style.display = 'none';
+
+  try {
+    const a = await BANITAMHID.Anggota.getById(id);
+    detailEl.innerHTML = `
+      <div style="display:flex;gap:20px;align-items:flex-start;margin-bottom:20px">
+        <div class="avatar" style="width:72px;height:72px;font-size:26px;border-radius:16px;background:${a.jenis_kelamin==='L'?'#e8f0fe':'#f3e8fd'};color:${a.jenis_kelamin==='L'?'#1a56b0':'#7b2fbe'}">
+          ${a.foto_profil_url ? `<img src="${a.foto_profil_url}" alt="" style="width:72px;height:72px;border-radius:16px;object-fit:cover">` : UI.inisial(a.nama_lengkap)}
+        </div>
+        <div>
+          <div style="font-size:20px;font-weight:600;color:var(--green-dark);margin-bottom:4px">${a.nama_lengkap}</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span class="badge ${a.jenis_kelamin==='L'?'badge-blue':'badge-purple'}">${a.jenis_kelamin==='L'?'Laki-laki':'Perempuan'}</span>
+            <span class="badge ${a.status_hidup==='hidup'?'badge-green':'badge-gray'}">${a.status_hidup==='hidup'?'Hidup':'Almarhum/ah'}</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px 20px">
+        ${dr('Tempat Lahir', a.tempat_lahir)}
+        ${dr('Tanggal Lahir', UI.formatDate(a.tanggal_lahir))}
+        ${dr('Usia', UI.formatAge(a.tanggal_lahir, a.tanggal_wafat))}
+        ${dr('Status Nikah', {belum_menikah:'Belum Menikah',menikah:'Menikah',cerai:'Cerai',duda_janda:'Duda/Janda'}[a.status_pernikahan]||'—')}
+        ${dr('Ayah', a.nama_ayah)}
+        ${dr('Ibu', a.nama_ibu)}
+        ${a.status_hidup==='meninggal' ? dr('Tanggal Wafat', UI.formatDate(a.tanggal_wafat)) : ''}
+        ${a.status_hidup==='meninggal' ? dr('Lokasi Makam', a.lokasi_makam) : ''}
+        ${dr('Alamat', a.alamat, true)}
+        ${dr('Nomor HP', a.nomor_hp)}
+      </div>
+
+      ${a.pernikahan?.length ? `
+      <div class="divider"></div>
+      <div style="font-size:14px;font-weight:600;color:var(--green-dark);margin-bottom:12px">💍 Riwayat Pernikahan</div>
+      ${a.pernikahan.map((p,i) => `
+        <div style="padding:12px 16px;background:var(--cream);border-radius:8px;margin-bottom:8px">
+          <div style="font-weight:500;margin-bottom:4px">Ke-${p.urutan||i+1}: ${p.nama_pasangan}</div>
+          <div style="font-size:12px;color:var(--text-light)">
+            ${p.tanggal_menikah?'Menikah: '+UI.formatDate(p.tanggal_menikah):''}
+            ${p.status!=='aktif'?' · '+{cerai:'Cerai',meninggal:'Pasangan meninggal'}[p.status]:''}
+          </div>
+        </div>`).join('')}` : ''}
+
+      ${a.anak?.length ? `
+      <div class="divider"></div>
+      <div style="font-size:14px;font-weight:600;color:var(--green-dark);margin-bottom:12px">👶 Anak (${a.anak.length})</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        ${a.anak.map(ak => `
+          <div onclick="UI.closeModal('modalDetail');setTimeout(()=>showDetail('${ak.id}'),150)"
+            style="padding:8px 14px;background:var(--green-pale);border-radius:8px;cursor:pointer;font-size:13px;color:var(--green-mid);font-weight:500">
+            ${ak.nama_lengkap}
+          </div>`).join('')}
+      </div>` : ''}
+    `;
+  } catch (err) {
+    detailEl.innerHTML = `<div class="alert alert-error">Gagal memuat: ${err.message}</div>`;
+  }
+}
+
+function dr(label, value, full = false) {
+  return `<div ${full?'style="grid-column:1/-1"':''}>
+    <div style="font-size:11.5px;color:var(--text-light);margin-bottom:2px;text-transform:uppercase;letter-spacing:.5px">${label}</div>
+    <div style="font-size:13.5px;color:var(--text-dark)">${value||'—'}</div>
+  </div>`;
+}
+
+// ── NAVIGASI EDIT ──
+function goEdit() {
+  if (currentDetailId) goEditAnggota(currentDetailId);
+}
+
+function goEditAnggota(id) {
+  window.location.href = `anggota.html?id=${id}`;
+}
+
+// ── HELPERS ──
+function highlight(text, kw) {
+  if (!text || !kw) return esc(text || '');
+  const escaped = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return esc(text).replace(new RegExp(`(${escaped})`, 'gi'), '<mark>$1</mark>');
+}
+
+function esc(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
