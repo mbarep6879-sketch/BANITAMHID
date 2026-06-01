@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard — BAFITS</title>
+  <title>Dashboard — BANITAMHID</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="../css/main.css"/>
@@ -24,11 +24,11 @@
 <script src="../js/ui.js"></script>
 <script>
 (async () => {
-  const session = await BAFITS.Auth.requireAuth();
+  const session = await BANITAMHID.Auth.requireAuth();
   if (!session) return;
 
-  const user    = await BAFITS.Auth.getUser();
-  const profile = await BAFITS.UserProfile.getProfile(user.id);
+  const user    = await BANITAMHID.Auth.getUser();
+  const profile = await BANITAMHID.UserProfile.getProfile(user.id);
 
   // ── Render layout shell ──
   document.getElementById('root').outerHTML = `
@@ -132,7 +132,7 @@
   await Promise.all([loadStats(), loadNotifikasi(), loadAnggotaTerbaru(), loadChart()]);
 
   // Realtime notifikasi
-  BAFITS.Notifikasi.subscribeRealtime(() => {
+  BANITAMHID.Notifikasi.subscribeRealtime(() => {
     loadNotifikasi();
     const dot = document.getElementById('notifDot');
     if (dot) dot.style.display = 'block';
@@ -143,7 +143,7 @@
 // ── LOAD STATISTIK ──
 async function loadStats() {
   try {
-    const { data: anggota } = await BAFITS.db
+    const { data: anggota } = await BANITAMHID.db
       .from('anggota_keluarga')
       .select('jenis_kelamin, status_hidup');
 
@@ -153,7 +153,7 @@ async function loadStats() {
     const hidup    = anggota?.filter(a => a.status_hidup === 'hidup').length || 0;
     const meninggal= anggota?.filter(a => a.status_hidup === 'meninggal').length || 0;
 
-    const { count: totalNikah } = await BAFITS.db
+    const { count: totalNikah } = await BANITAMHID.db
       .from('pernikahan_anggota')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'aktif');
@@ -183,7 +183,7 @@ async function loadStats() {
 // ── LOAD NOTIFIKASI ──
 async function loadNotifikasi() {
   try {
-    const data = await BAFITS.Notifikasi.getAll(8);
+    const data = await BANITAMHID.Notifikasi.getAll(8);
     const container = document.getElementById('notifList');
     if (!data?.length) {
       container.innerHTML = `<div class="empty-state" style="padding:32px">
@@ -213,7 +213,7 @@ async function loadNotifikasi() {
 // ── LOAD ANGGOTA TERBARU ──
 async function loadAnggotaTerbaru() {
   try {
-    const { data } = await BAFITS.db
+    const { data } = await BANITAMHID.db
       .from('anggota_keluarga')
       .select('id, nama_lengkap, jenis_kelamin, tempat_lahir, tanggal_lahir, status_hidup, foto_profil_url, created_at')
       .order('created_at', { ascending: false })
@@ -260,7 +260,7 @@ async function loadAnggotaTerbaru() {
 // ── LOAD CHART PERTUMBUHAN ──
 async function loadChart() {
   try {
-    const { data } = await BAFITS.db
+    const { data } = await BANITAMHID.db
       .from('anggota_keluarga')
       .select('tanggal_lahir')
       .not('tanggal_lahir', 'is', null)
