@@ -1,5 +1,5 @@
 // ============================================================
-// BAFITS — UI Helpers (sidebar, topbar, navigasi)
+// BANITAMHID — UI Helpers (sidebar, topbar, navigasi)
 // Include setelah supabase.js di setiap halaman
 // ============================================================
 
@@ -8,11 +8,11 @@ const UI = {
   // ── Render sidebar & topbar ke halaman ──
   async init(pageTitle = 'Dashboard', activeNav = 'dashboard') {
     // Cek auth
-    const session = await BAFITS.Auth.requireAuth();
+    const session = await BANITAMHID.Auth.requireAuth();
     if (!session) return;
 
-    const user = await BAFITS.Auth.getUser();
-    const profile = await BAFITS.UserProfile.getProfile(user.id);
+    const user = await BANITAMHID.Auth.getUser();
+    const profile = await BANITAMHID.UserProfile.getProfile(user.id);
 
     // Inject layout
     document.body.innerHTML = `
@@ -51,7 +51,7 @@ const UI = {
         <div class="logo-icon">🌳</div>
         <div>
           <div class="logo-text">بني تمهيد</div>
-          <div class="logo-sub">BAFITS</div>
+          <div class="logo-sub">BANITAMHID</div>
         </div>
       </div>
 
@@ -166,7 +166,7 @@ const UI = {
 
   async logout() {
     try {
-      await BAFITS.Auth.logout();
+      await BANITAMHID.Auth.logout();
     } catch (e) {
       window.location.href = '../index.html';
     }
@@ -174,7 +174,7 @@ const UI = {
 
   async _loadNotifBadge() {
     try {
-      const { data } = await BAFITS.db
+      const { data } = await BANITAMHID.db
         .from('notifikasi')
         .select('id', { count: 'exact', head: true })
         .eq('dibaca', false);
