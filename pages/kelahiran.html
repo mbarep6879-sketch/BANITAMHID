@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Kelahiran — BAFITS</title>
+  <title>Kelahiran — BANITAMHID</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="../css/main.css"/>
@@ -26,10 +26,10 @@ let filterJK     = '';
 let filterTahun  = '';
 
 (async () => {
-  const session = await BAFITS.Auth.requireAuth();
+  const session = await BANITAMHID.Auth.requireAuth();
   if (!session) return;
-  const user    = await BAFITS.Auth.getUser();
-  const profile = await BAFITS.UserProfile.getProfile(user.id);
+  const user    = await BANITAMHID.Auth.getUser();
+  const profile = await BANITAMHID.UserProfile.getProfile(user.id);
 
   document.getElementById('root').outerHTML = `
   <div class="app-shell">
@@ -101,7 +101,7 @@ let filterTahun  = '';
 })();
 
 async function loadStats() {
-  const { data } = await BAFITS.db
+  const { data } = await BANITAMHID.db
     .from('anggota_keluarga')
     .select('jenis_kelamin, tanggal_lahir')
     .not('tanggal_lahir', 'is', null);
@@ -136,7 +136,7 @@ async function loadData() {
   const tbody = document.getElementById('tbodyKelahiran');
   tbody.innerHTML = UI.skeletonRows(6, 8);
   try {
-    let query = BAFITS.db
+    let query = BANITAMHID.db
       .from('anggota_keluarga')
       .select('id, nama_lengkap, jenis_kelamin, tempat_lahir, tanggal_lahir, status_hidup, tanggal_wafat, nama_ayah, nama_ibu, foto_profil_url', { count: 'exact' })
       .not('tanggal_lahir', 'is', null)
@@ -198,7 +198,7 @@ function renderPaginasi() {
 function goPage(p) { if(p<1||p>Math.ceil(totalRows/perPage))return; currentPage=p; loadData(); window.scrollTo({top:0}); }
 
 async function loadChart() {
-  const { data } = await BAFITS.db
+  const { data } = await BANITAMHID.db
     .from('anggota_keluarga')
     .select('tanggal_lahir, jenis_kelamin')
     .not('tanggal_lahir','is',null)
