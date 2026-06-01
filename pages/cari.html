@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cari Data — BAFITS</title>
+  <title>Cari Data — BANITAMHID</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="../css/main.css"/>
@@ -347,11 +347,11 @@ const MAX_RESULTS  = 30;
 
 // ── INIT ──
 (async () => {
-  const session = await BAFITS.Auth.requireAuth();
+  const session = await BANITAMHID.Auth.requireAuth();
   if (!session) return;
-  const user    = await BAFITS.Auth.getUser();
-  const profile = await BAFITS.UserProfile.getProfile(user.id);
-  isAdmin       = await BAFITS.UserProfile.isAdmin();
+  const user    = await BANITAMHID.Auth.getUser();
+  const profile = await BANITAMHID.UserProfile.getProfile(user.id);
+  isAdmin       = await BANITAMHID.UserProfile.isAdmin();
 
   document.getElementById('root').outerHTML = `
   <div class="app-shell">
@@ -471,7 +471,7 @@ async function fetchAll(kw) {
 
   if (activeFilter === 'semua' || activeFilter === 'anggota') {
     searches.push(
-      BAFITS.db
+      BANITAMHID.db
         .from('anggota_keluarga')
         .select('id, nama_lengkap, jenis_kelamin, tanggal_lahir, tempat_lahir, nama_ayah, nama_ibu, status_hidup, nomor_hp, foto_profil_url')
         .or(`nama_lengkap.ilike.${like},nama_ayah.ilike.${like},nama_ibu.ilike.${like},tempat_lahir.ilike.${like},alamat.ilike.${like}`)
@@ -483,7 +483,7 @@ async function fetchAll(kw) {
 
   if (activeFilter === 'semua' || activeFilter === 'pernikahan') {
     searches.push(
-      BAFITS.db
+      BANITAMHID.db
         .from('pernikahan_anggota')
         .select('id, anggota_id, nama_pasangan, tanggal_menikah, status, anggota:anggota_keluarga(id, nama_lengkap)')
         .ilike('nama_pasangan', like)
@@ -494,7 +494,7 @@ async function fetchAll(kw) {
 
   if (activeFilter === 'semua' || activeFilter === 'kelahiran') {
     searches.push(
-      BAFITS.db
+      BANITAMHID.db
         .from('anggota_keluarga')
         .select('id, nama_lengkap, tanggal_lahir, tempat_lahir, nama_ayah, nama_ibu, jenis_kelamin')
         .ilike('nama_lengkap', like)
@@ -507,7 +507,7 @@ async function fetchAll(kw) {
 
   if (activeFilter === 'semua' || activeFilter === 'kematian') {
     searches.push(
-      BAFITS.db
+      BANITAMHID.db
         .from('anggota_keluarga')
         .select('id, nama_lengkap, tanggal_wafat, lokasi_makam, jenis_kelamin')
         .ilike('nama_lengkap', like)
@@ -694,7 +694,7 @@ async function showDetail(id) {
   if (!isAdmin) document.getElementById('btnEditDetail').style.display = 'none';
 
   try {
-    const a = await BAFITS.Anggota.getById(id);
+    const a = await BANITAMHID.Anggota.getById(id);
     detailEl.innerHTML = `
       <div style="display:flex;gap:20px;align-items:flex-start;margin-bottom:20px">
         <div class="avatar" style="width:72px;height:72px;font-size:26px;border-radius:16px;background:${a.jenis_kelamin==='L'?'#e8f0fe':'#f3e8fd'};color:${a.jenis_kelamin==='L'?'#1a56b0':'#7b2fbe'}">
