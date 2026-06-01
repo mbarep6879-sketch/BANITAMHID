@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Anggota Keluarga — BAFITS</title>
+  <title>Anggota Keluarga — BANITAMHID</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="../css/main.css"/>
@@ -211,11 +211,11 @@ let isAdmin      = false;
 
 // ── INIT ──
 (async () => {
-  const session = await BAFITS.Auth.requireAuth();
+  const session = await BANITAMHID.Auth.requireAuth();
   if (!session) return;
-  const user    = await BAFITS.Auth.getUser();
-  const profile = await BAFITS.UserProfile.getProfile(user.id);
-  isAdmin       = await BAFITS.UserProfile.isAdmin();
+  const user    = await BANITAMHID.Auth.getUser();
+  const profile = await BANITAMHID.UserProfile.getProfile(user.id);
+  isAdmin       = await BANITAMHID.UserProfile.isAdmin();
 
   document.getElementById('root').outerHTML = `
   <div class="app-shell">
@@ -304,7 +304,7 @@ async function loadData() {
   tbody.innerHTML = UI.skeletonRows(7, 8);
 
   try {
-    let query = BAFITS.db
+    let query = BANITAMHID.db
       .from('anggota_keluarga')
       .select('id, nama_lengkap, jenis_kelamin, nama_ayah, nama_ibu, tanggal_lahir, status_hidup, nomor_hp, foto_profil_url', { count: 'exact' })
       .order('nama_lengkap')
@@ -425,7 +425,7 @@ function setupAC(inputId, saranId, hiddenId, jk) {
     const val = input.value.trim();
     if (val.length < 2) { saran.style.display = 'none'; return; }
     timer = setTimeout(async () => {
-      const { data } = await BAFITS.db
+      const { data } = await BANITAMHID.db
         .from('anggota_keluarga')
         .select('id, nama_lengkap, tanggal_lahir')
         .eq('jenis_kelamin', jk)
@@ -593,10 +593,10 @@ async function simpanAnggota() {
 
     let anggotaId;
     if (editingId) {
-      await BAFITS.Anggota.update(editingId, payload);
+      await BANITAMHID.Anggota.update(editingId, payload);
       anggotaId = editingId;
     } else {
-      const result = await BAFITS.Anggota.create(payload);
+      const result = await BANITAMHID.Anggota.create(payload);
       anggotaId = result.id;
     }
 
@@ -605,7 +605,7 @@ async function simpanAnggota() {
       for (let i = 0; i < riwayatNikah.length; i++) {
         const r = riwayatNikah[i];
         if (!r.nama_pasangan?.trim()) continue;
-        await BAFITS.db.from('pernikahan_anggota').insert({
+        await BANITAMHID.db.from('pernikahan_anggota').insert({
           anggota_id: anggotaId,
           nama_pasangan: r.nama_pasangan.trim(),
           tanggal_menikah: r.tanggal_menikah || null,
@@ -616,7 +616,7 @@ async function simpanAnggota() {
       }
     }
 
-    BAFITS.Toast.success(editingId ? 'Data berhasil diperbarui!' : 'Anggota berhasil ditambahkan!');
+    BANITAMHID.Toast.success(editingId ? 'Data berhasil diperbarui!' : 'Anggota berhasil ditambahkan!');
     closeForm();
     loadData();
   } catch (err) {
@@ -629,10 +629,10 @@ async function simpanAnggota() {
 // ── EDIT ──
 async function editAnggota(id) {
   try {
-    const data = await BAFITS.Anggota.getById(id);
+    const data = await BANITAMHID.Anggota.getById(id);
     openForm(data);
   } catch (err) {
-    BAFITS.Toast.error('Gagal memuat data: ' + err.message);
+    BANITAMHID.Toast.error('Gagal memuat data: ' + err.message);
   }
 }
 
@@ -647,11 +647,11 @@ function hapusAnggota(id, nama) {
     `Hapus anggota <strong>${nama}</strong>? Semua data terkait (foto, pernikahan) juga akan terhapus.`,
     async () => {
       try {
-        await BAFITS.Anggota.delete(id);
-        BAFITS.Toast.success('Anggota berhasil dihapus.');
+        await BANITAMHID.Anggota.delete(id);
+        BANITAMHID.Toast.success('Anggota berhasil dihapus.');
         loadData();
       } catch (err) {
-        BAFITS.Toast.error('Gagal menghapus: ' + err.message);
+        BANITAMHID.Toast.error('Gagal menghapus: ' + err.message);
       }
     }, 'Hapus'
   );
@@ -665,7 +665,7 @@ async function showDetail(id) {
   if (!isAdmin) document.getElementById('btnEditDetail').style.display = 'none';
 
   try {
-    const a = await BAFITS.Anggota.getById(id);
+    const a = await BANITAMHID.Anggota.getById(id);
 
     document.getElementById('detailContent').innerHTML = `
       <div style="display:flex;gap:20px;align-items:flex-start;margin-bottom:20px">
