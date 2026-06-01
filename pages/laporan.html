@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Laporan — BAFITS</title>
+  <title>Laporan — BANITAMHID</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="../css/main.css"/>
@@ -72,10 +72,10 @@ let reportData = [];
 let activeReport = '';
 
 (async () => {
-  const session = await BAFITS.Auth.requireAuth();
+  const session = await BANITAMHID.Auth.requireAuth();
   if (!session) return;
-  const user    = await BAFITS.Auth.getUser();
-  const profile = await BAFITS.UserProfile.getProfile(user.id);
+  const user    = await BANITAMHID.Auth.getUser();
+  const profile = await BANITAMHID.UserProfile.getProfile(user.id);
 
   document.getElementById('root').outerHTML = `
   <div class="app-shell">
@@ -150,7 +150,7 @@ async function loadReport(type) {
 
 // ── LAPORAN ANGGOTA ──
 async function reportAnggota(area) {
-  const { data, error } = await BAFITS.db
+  const { data, error } = await BANITAMHID.db
     .from('anggota_keluarga')
     .select('nama_lengkap, jenis_kelamin, tempat_lahir, tanggal_lahir, nama_ayah, nama_ibu, status_hidup, status_pernikahan, alamat, nomor_hp')
     .order('nama_lengkap');
@@ -228,7 +228,7 @@ function filterTableAnggota(type, val) {
 
 // ── LAPORAN PERNIKAHAN ──
 async function reportPernikahan(area) {
-  const { data, error } = await BAFITS.db
+  const { data, error } = await BANITAMHID.db
     .from('pernikahan_anggota')
     .select(`*, anggota:anggota_keluarga(nama_lengkap, jenis_kelamin)`)
     .order('tanggal_menikah', { ascending: false });
@@ -264,7 +264,7 @@ async function reportPernikahan(area) {
 
 // ── LAPORAN KELAHIRAN ──
 async function reportKelahiran(area) {
-  const { data, error } = await BAFITS.db
+  const { data, error } = await BANITAMHID.db
     .from('anggota_keluarga')
     .select('nama_lengkap, jenis_kelamin, tempat_lahir, tanggal_lahir, nama_ayah, nama_ibu')
     .not('tanggal_lahir', 'is', null)
@@ -311,7 +311,7 @@ async function reportKelahiran(area) {
 
 // ── LAPORAN KEMATIAN ──
 async function reportKematian(area) {
-  const { data, error } = await BAFITS.db
+  const { data, error } = await BANITAMHID.db
     .from('anggota_keluarga')
     .select('nama_lengkap, jenis_kelamin, tanggal_lahir, tanggal_wafat, lokasi_makam, keterangan_wafat')
     .eq('status_hidup', 'meninggal')
@@ -350,8 +350,8 @@ async function reportKematian(area) {
 
 // ── STATISTIK ──
 async function reportStatistik(area) {
-  const { data } = await BAFITS.db.from('anggota_keluarga').select('jenis_kelamin, status_hidup, status_pernikahan, tanggal_lahir');
-  const { count: totalNikah } = await BAFITS.db.from('pernikahan_anggota').select('*',{count:'exact',head:true}).eq('status','aktif');
+  const { data } = await BANITAMHID.db.from('anggota_keluarga').select('jenis_kelamin, status_hidup, status_pernikahan, tanggal_lahir');
+  const { count: totalNikah } = await BANITAMHID.db.from('pernikahan_anggota').select('*',{count:'exact',head:true}).eq('status','aktif');
 
   const total  = data?.length || 0;
   const laki   = data?.filter(a=>a.jenis_kelamin==='L').length || 0;
@@ -381,7 +381,7 @@ async function reportStatistik(area) {
       </div>
       <div style="margin-top:24px;padding:16px;background:var(--cream);border-radius:10px;font-size:12.5px;color:var(--text-mid);line-height:2">
         Dicetak pada: <strong>${new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</strong><br>
-        Sistem: <strong>BAFITS — Bani Tamhid Family Tree System</strong>
+        Sistem: <strong>BANITAMHID — Bani Tamhid Family Tree System</strong>
       </div>
     </div>
   </div>`;
@@ -403,13 +403,13 @@ function cetakLaporan() {
 
 // ── EXPORT EXCEL ──
 async function exportExcel(type) {
-  BAFITS.Toast.info('Menyiapkan file Excel...');
+  BANITAMHID.Toast.info('Menyiapkan file Excel...');
   try {
     let sheetData = [];
     let fileName  = 'laporan';
 
     if (type === 'anggota') {
-      const { data } = await BAFITS.db.from('anggota_keluarga').select('*').order('nama_lengkap');
+      const { data } = await BANITAMHID.db.from('anggota_keluarga').select('*').order('nama_lengkap');
       sheetData = (data||[]).map((a,i) => ({
         'No': i+1, 'Nama Lengkap': a.nama_lengkap,
         'Jenis Kelamin': a.jenis_kelamin==='L'?'Laki-laki':'Perempuan',
@@ -421,7 +421,7 @@ async function exportExcel(type) {
       }));
       fileName = 'laporan-anggota-keluarga';
     } else if (type === 'pernikahan') {
-      const { data } = await BAFITS.db.from('pernikahan_anggota').select('*, anggota:anggota_keluarga(nama_lengkap)').order('tanggal_menikah', {ascending:false});
+      const { data } = await BANITAMHID.db.from('pernikahan_anggota').select('*, anggota:anggota_keluarga(nama_lengkap)').order('tanggal_menikah', {ascending:false});
       sheetData = (data||[]).map((p,i) => ({
         'No': i+1, 'Nama': p.anggota?.nama_lengkap||'',
         'Pasangan ke-': p.urutan, 'Nama Pasangan': p.nama_pasangan,
@@ -430,7 +430,7 @@ async function exportExcel(type) {
       }));
       fileName = 'laporan-pernikahan';
     } else if (type === 'kelahiran') {
-      const { data } = await BAFITS.db.from('anggota_keluarga').select('nama_lengkap, jenis_kelamin, tempat_lahir, tanggal_lahir, nama_ayah, nama_ibu').not('tanggal_lahir','is',null).order('tanggal_lahir',{ascending:false});
+      const { data } = await BANITAMHID.db.from('anggota_keluarga').select('nama_lengkap, jenis_kelamin, tempat_lahir, tanggal_lahir, nama_ayah, nama_ibu').not('tanggal_lahir','is',null).order('tanggal_lahir',{ascending:false});
       sheetData = (data||[]).map((a,i) => ({
         'No': i+1, 'Nama': a.nama_lengkap,
         'JK': a.jenis_kelamin==='L'?'Laki-laki':'Perempuan',
@@ -439,7 +439,7 @@ async function exportExcel(type) {
       }));
       fileName = 'laporan-kelahiran';
     } else if (type === 'kematian') {
-      const { data } = await BAFITS.db.from('anggota_keluarga').select('nama_lengkap, jenis_kelamin, tanggal_lahir, tanggal_wafat, lokasi_makam, keterangan_wafat').eq('status_hidup','meninggal').order('tanggal_wafat',{ascending:false});
+      const { data } = await BANITAMHID.db.from('anggota_keluarga').select('nama_lengkap, jenis_kelamin, tanggal_lahir, tanggal_wafat, lokasi_makam, keterangan_wafat').eq('status_hidup','meninggal').order('tanggal_wafat',{ascending:false});
       sheetData = (data||[]).map((a,i) => ({
         'No': i+1, 'Nama': a.nama_lengkap,
         'JK': a.jenis_kelamin==='L'?'Laki-laki':'Perempuan',
@@ -458,9 +458,9 @@ async function exportExcel(type) {
     ws['!cols'] = Array(range.e.c + 1).fill({ wch: 20 });
 
     XLSX.writeFile(wb, `${fileName}-${new Date().toISOString().slice(0,10)}.xlsx`);
-    BAFITS.Toast.success('File Excel berhasil diunduh!');
+    BANITAMHID.Toast.success('File Excel berhasil diunduh!');
   } catch (err) {
-    BAFITS.Toast.error('Gagal export: ' + err.message);
+    BANITAMHID.Toast.error('Gagal export: ' + err.message);
   }
 }
 </script>
