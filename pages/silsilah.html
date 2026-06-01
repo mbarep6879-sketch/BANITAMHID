@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Pohon Silsilah — BAFITS</title>
+  <title>Pohon Silsilah — BANITAMHID</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="../css/main.css"/>
@@ -158,10 +158,10 @@
 <script src="../js/ui.js"></script>
 <script>
 (async () => {
-  const session = await BAFITS.Auth.requireAuth();
+  const session = await BANITAMHID.Auth.requireAuth();
   if (!session) return;
-  const user    = await BAFITS.Auth.getUser();
-  const profile = await BAFITS.UserProfile.getProfile(user.id);
+  const user    = await BANITAMHID.Auth.getUser();
+  const profile = await BANITAMHID.UserProfile.getProfile(user.id);
 
   document.getElementById('root').outerHTML = `
   <div class="app-shell" style="flex-direction:column">
@@ -267,7 +267,7 @@ const V_GAP    = 80;
 
 async function initTree() {
   try {
-    const { data, error } = await BAFITS.db
+    const { data, error } = await BANITAMHID.db
       .from('anggota_keluarga')
       .select('id, nama_lengkap, jenis_kelamin, nama_ayah_id, nama_ibu_id, nama_ayah, nama_ibu, tanggal_lahir, tanggal_wafat, status_hidup, foto_profil_url, status_pernikahan')
       .order('tanggal_lahir', { ascending: true, nullsFirst: false });
@@ -627,7 +627,7 @@ function buildGenFilter() {
 function filterGen(gen, show) {
   // Implementasi sederhana: toggle visibility berdasarkan depth
   // Untuk implementasi penuh perlu tracking depth di state
-  BAFITS.Toast.info(`Filter generasi ${gen} ${show ? 'ditampilkan' : 'disembunyikan'}`);
+  BANITAMHID.Toast.info(`Filter generasi ${gen} ${show ? 'ditampilkan' : 'disembunyikan'}`);
 }
 </script>
 </body>
