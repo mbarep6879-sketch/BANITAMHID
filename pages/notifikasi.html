@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Notifikasi — BAFITS</title>
+  <title>Notifikasi — BANITAMHID</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="../css/main.css"/>
@@ -17,10 +17,10 @@
 <script src="../js/ui.js"></script>
 <script>
 (async () => {
-  const session = await BAFITS.Auth.requireAuth();
+  const session = await BANITAMHID.Auth.requireAuth();
   if (!session) return;
-  const user    = await BAFITS.Auth.getUser();
-  const profile = await BAFITS.UserProfile.getProfile(user.id);
+  const user    = await BANITAMHID.Auth.getUser();
+  const profile = await BANITAMHID.UserProfile.getProfile(user.id);
 
   document.getElementById('root').outerHTML = `
   <div class="app-shell">
@@ -45,12 +45,12 @@
   UI._bindEvents(profile);
   loadNotif();
 
-  BAFITS.Notifikasi.subscribeRealtime(() => loadNotif());
+  BANITAMHID.Notifikasi.subscribeRealtime(() => loadNotif());
 })();
 
 async function loadNotif() {
   try {
-    const data = await BAFITS.Notifikasi.getAll(50);
+    const data = await BANITAMHID.Notifikasi.getAll(50);
     const container = document.getElementById('notifContainer');
     const tipeIcon  = { tambah:'➕', kematian:'🌙', pernikahan:'💍', kelahiran:'👶', edit:'✏️' };
     const tipeLabel = { tambah:'Anggota Baru', kematian:'Berita Duka', pernikahan:'Pernikahan', kelahiran:'Kelahiran', edit:'Perubahan Data' };
@@ -77,19 +77,19 @@ async function loadNotif() {
         ${!n.dibaca ? `<button onclick="bacaSatu('${n.id}')" style="font-size:12px;color:var(--green-light);background:none;border:none;cursor:pointer;white-space:nowrap;padding:4px">Tandai dibaca</button>` : ''}
       </div>`).join('');
   } catch (err) {
-    BAFITS.Toast.error('Gagal memuat notifikasi: ' + err.message);
+    BANITAMHID.Toast.error('Gagal memuat notifikasi: ' + err.message);
   }
 }
 
 async function bacaSatu(id) {
-  await BAFITS.Notifikasi.markRead(id);
+  await BANITAMHID.Notifikasi.markRead(id);
   const el = document.getElementById('notif-' + id);
   if (el) { el.style.background = '#fff'; el.querySelector('button')?.remove(); }
 }
 
 async function bacaSemua() {
-  await BAFITS.Notifikasi.markAllRead();
-  BAFITS.Toast.success('Semua notifikasi ditandai dibaca.');
+  await BANITAMHID.Notifikasi.markAllRead();
+  BANITAMHID.Toast.success('Semua notifikasi ditandai dibaca.');
   loadNotif();
 }
 </script>
