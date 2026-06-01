@@ -1,4 +1,4 @@
-# 🌳 BAFITS — Bani Tamhid Family Tree System
+# 🌳 BANITAMHID — Bani Tamhid Family Tree System
 > Sistem Silsilah Digital Keluarga Besar Bani Tamhid
 
 ---
