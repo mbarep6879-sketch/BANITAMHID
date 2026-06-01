@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Galeri Foto — BAFITS</title>
+  <title>Galeri Foto — BANITAMHID</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="../css/main.css"/>
@@ -193,11 +193,11 @@ let filterAnggota = '';
 let filterTipe    = '';
 
 (async () => {
-  const session = await BAFITS.Auth.requireAuth();
+  const session = await BANITAMHID.Auth.requireAuth();
   if (!session) return;
-  const user    = await BAFITS.Auth.getUser();
-  const profile = await BAFITS.UserProfile.getProfile(user.id);
-  isAdmin       = await BAFITS.UserProfile.isAdmin();
+  const user    = await BANITAMHID.Auth.getUser();
+  const profile = await BANITAMHID.UserProfile.getProfile(user.id);
+  isAdmin       = await BANITAMHID.UserProfile.isAdmin();
 
   document.getElementById('root').outerHTML = `
   <div class="app-shell">
@@ -250,7 +250,7 @@ let filterTipe    = '';
 
 async function loadFoto() {
   try {
-    const { data, error } = await BAFITS.db
+    const { data, error } = await BANITAMHID.db
       .from('foto_anggota')
       .select(`*, anggota:anggota_keluarga(id, nama_lengkap, jenis_kelamin)`)
       .order('created_at', { ascending: false });
@@ -258,7 +258,7 @@ async function loadFoto() {
     allFoto = data || [];
     renderGallery(allFoto);
   } catch (err) {
-    BAFITS.Toast.error('Gagal memuat galeri: ' + err.message);
+    BANITAMHID.Toast.error('Gagal memuat galeri: ' + err.message);
   }
 }
 
@@ -345,7 +345,7 @@ document.addEventListener('keydown', e => {
 
 // ── UPLOAD ──
 async function populateAnggotaSelect() {
-  const { data } = await BAFITS.db.from('anggota_keluarga').select('id, nama_lengkap').order('nama_lengkap');
+  const { data } = await BANITAMHID.db.from('anggota_keluarga').select('id, nama_lengkap').order('nama_lengkap');
   const sel = document.getElementById('uploadAnggotaId');
   data?.forEach(a => {
     const opt = document.createElement('option');
@@ -417,18 +417,18 @@ async function doUpload() {
       const ext  = file.name.split('.').pop().toLowerCase();
       const path = `${anggotaId}/${tipe}_${Date.now()}_${Math.random().toString(36).substr(2,5)}.${ext}`;
 
-      const { error: upErr } = await BAFITS.db.storage.from('foto-anggota').upload(path, file, { upsert: true });
+      const { error: upErr } = await BANITAMHID.db.storage.from('foto-anggota').upload(path, file, { upsert: true });
       if (upErr) throw upErr;
 
-      const { data: { publicUrl } } = BAFITS.db.storage.from('foto-anggota').getPublicUrl(path);
+      const { data: { publicUrl } } = BANITAMHID.db.storage.from('foto-anggota').getPublicUrl(path);
 
-      await BAFITS.db.from('foto_anggota').insert({
+      await BANITAMHID.db.from('foto_anggota').insert({
         anggota_id: anggotaId, url: publicUrl,
         storage_path: path, tipe, keterangan: ket || null
       });
 
       if (tipe === 'profil') {
-        await BAFITS.db.from('anggota_keluarga').update({ foto_profil_url: publicUrl }).eq('id', anggotaId);
+        await BANITAMHID.db.from('anggota_keluarga').update({ foto_profil_url: publicUrl }).eq('id', anggotaId);
       }
 
       uploaded++;
@@ -445,7 +445,7 @@ async function doUpload() {
   if (errors.length) {
     alertEl.innerHTML = `<div class="alert alert-error">Gagal upload: ${errors.join('<br>')}</div>`;
   } else {
-    BAFITS.Toast.success(`${uploaded} foto berhasil diupload!`);
+    BANITAMHID.Toast.success(`${uploaded} foto berhasil diupload!`);
     UI.closeModal('modalUpload');
     loadFoto();
   }
@@ -454,12 +454,12 @@ async function doUpload() {
 async function hapusFoto(id, path) {
   UI.confirm('Hapus foto ini dari galeri?', async () => {
     try {
-      if (path) await BAFITS.db.storage.from('foto-anggota').remove([path]);
-      await BAFITS.db.from('foto_anggota').delete().eq('id', id);
-      BAFITS.Toast.success('Foto dihapus.');
+      if (path) await BANITAMHID.db.storage.from('foto-anggota').remove([path]);
+      await BANITAMHID.db.from('foto_anggota').delete().eq('id', id);
+      BANITAMHID.Toast.success('Foto dihapus.');
       loadFoto();
     } catch (err) {
-      BAFITS.Toast.error('Gagal menghapus: ' + err.message);
+      BANITAMHID.Toast.error('Gagal menghapus: ' + err.message);
     }
   }, 'Hapus');
 }
