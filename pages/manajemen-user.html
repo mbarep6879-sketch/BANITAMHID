@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Manajemen User — BAFITS</title>
+  <title>Manajemen User — BANITAMHID</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="../css/main.css"/>
@@ -70,10 +70,10 @@
 let editingUserId = null;
 
 (async () => {
-  const session = await BAFITS.Auth.requireAuth();
+  const session = await BANITAMHID.Auth.requireAuth();
   if (!session) return;
-  const user    = await BAFITS.Auth.getUser();
-  const profile = await BAFITS.UserProfile.getProfile(user.id);
+  const user    = await BANITAMHID.Auth.getUser();
+  const profile = await BANITAMHID.UserProfile.getProfile(user.id);
 
   // Hanya super admin
   if (profile?.role !== 'super_admin') {
@@ -166,7 +166,7 @@ function roleCard(icon, title, desc, bg, color) {
 
 async function loadUsers() {
   try {
-    const { data, error } = await BAFITS.db
+    const { data, error } = await BANITAMHID.db
       .from('user_profiles')
       .select('*')
       .order('created_at');
@@ -175,7 +175,7 @@ async function loadUsers() {
     document.getElementById('userCount').textContent = `${allUsers.length} pengguna`;
     renderUsers(allUsers);
   } catch (err) {
-    BAFITS.Toast.error('Gagal memuat user: ' + err.message);
+    BANITAMHID.Toast.error('Gagal memuat user: ' + err.message);
   }
 }
 
@@ -281,7 +281,7 @@ async function simpanUser() {
     if (editingUserId) {
       // ── MODE EDIT: update data profil di tabel user_profiles ──
       const updatePayload = { nama_lengkap: nama, role, aktif };
-      const { error } = await BAFITS.db
+      const { error } = await BANITAMHID.db
         .from('user_profiles')
         .update(updatePayload)
         .eq('id', editingUserId);
@@ -289,7 +289,7 @@ async function simpanUser() {
 
       // Jika ada password baru, update via Auth (hanya bisa untuk user sendiri)
       if (pass && pass.length >= 8) {
-        const { error: passErr } = await BAFITS.db.auth.updateUser({ password: pass });
+        const { error: passErr } = await BANITAMHID.db.auth.updateUser({ password: pass });
         if (passErr) {
           alertEl.innerHTML = `<div class="alert alert-warning">
             Profil tersimpan, namun password tidak dapat diubah untuk user lain melalui browser.
@@ -297,7 +297,7 @@ async function simpanUser() {
           </div>`;
         }
       }
-      BAFITS.Toast.success('Data pengguna diperbarui!');
+      BANITAMHID.Toast.success('Data pengguna diperbarui!');
       UI.closeModal('modalUser');
       loadUsers();
 
@@ -305,7 +305,7 @@ async function simpanUser() {
       // ── MODE TAMBAH: gunakan signUp Supabase ──
       // Catatan: pastikan di Supabase Dashboard → Auth → Settings
       //   "Enable email confirmations" = OFF  agar user langsung aktif
-      const { data: authData, error: authErr } = await BAFITS.db.auth.signUp({
+      const { data: authData, error: authErr } = await BANITAMHID.db.auth.signUp({
         email,
         password: pass,
         options: {
@@ -325,7 +325,7 @@ async function simpanUser() {
       }
 
       // Simpan/update profil ke user_profiles
-      const { error: profErr } = await BAFITS.db.from('user_profiles').upsert({
+      const { error: profErr } = await BANITAMHID.db.from('user_profiles').upsert({
         id: authData.user.id,
         email,
         nama_lengkap: nama,
@@ -334,7 +334,7 @@ async function simpanUser() {
       });
       if (profErr) throw profErr;
 
-      BAFITS.Toast.success(`Akun berhasil dibuat untuk ${email}!`);
+      BANITAMHID.Toast.success(`Akun berhasil dibuat untuk ${email}!`);
       UI.closeModal('modalUser');
       loadUsers();
     }
@@ -361,11 +361,11 @@ async function toggleAktif(id, currentStatus) {
   const label = currentStatus ? 'nonaktifkan' : 'aktifkan';
   UI.confirm(`${label.charAt(0).toUpperCase()+label.slice(1)} pengguna ini?`, async () => {
     try {
-      await BAFITS.db.from('user_profiles').update({ aktif: !currentStatus }).eq('id', id);
-      BAFITS.Toast.success(`Pengguna berhasil di-${label}.`);
+      await BANITAMHID.db.from('user_profiles').update({ aktif: !currentStatus }).eq('id', id);
+      BANITAMHID.Toast.success(`Pengguna berhasil di-${label}.`);
       loadUsers();
     } catch (err) {
-      BAFITS.Toast.error('Gagal: ' + err.message);
+      BANITAMHID.Toast.error('Gagal: ' + err.message);
     }
   }, label.charAt(0).toUpperCase()+label.slice(1), currentStatus ? 'danger' : 'primary');
 }
@@ -373,7 +373,7 @@ async function toggleAktif(id, currentStatus) {
 // ── AUDIT LOG ──
 async function loadAudit() {
   try {
-    const data = await BAFITS.AuditLog.getAll({ limit: 20 });
+    const data = await BANITAMHID.AuditLog.getAll({ limit: 20 });
     const tbody = document.getElementById('tbodyAudit');
     const aksiColor = { INSERT:'var(--green-mid)', UPDATE:'#9a6500', DELETE:'var(--error)' };
 
