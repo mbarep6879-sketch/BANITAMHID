@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Kematian — BAFITS</title>
+  <title>Kematian — BANITAMHID</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="../css/main.css"/>
@@ -24,10 +24,10 @@ let filterSearch = '';
 let filterJK     = '';
 
 (async () => {
-  const session = await BAFITS.Auth.requireAuth();
+  const session = await BANITAMHID.Auth.requireAuth();
   if (!session) return;
-  const user    = await BAFITS.Auth.getUser();
-  const profile = await BAFITS.UserProfile.getProfile(user.id);
+  const user    = await BANITAMHID.Auth.getUser();
+  const profile = await BANITAMHID.UserProfile.getProfile(user.id);
 
   document.getElementById('root').outerHTML = `
   <div class="app-shell">
@@ -110,7 +110,7 @@ let filterJK     = '';
 })();
 
 async function loadStats() {
-  const { data } = await BAFITS.db
+  const { data } = await BANITAMHID.db
     .from('anggota_keluarga')
     .select('jenis_kelamin, tanggal_lahir, tanggal_wafat')
     .eq('status_hidup', 'meninggal');
@@ -140,7 +140,7 @@ async function loadData() {
   const tbody = document.getElementById('tbodyKematian');
   tbody.innerHTML = UI.skeletonRows(7, 8);
   try {
-    let query = BAFITS.db
+    let query = BANITAMHID.db
       .from('anggota_keluarga')
       .select('id, nama_lengkap, jenis_kelamin, tanggal_lahir, tanggal_wafat, lokasi_makam, keterangan_wafat, foto_profil_url', { count: 'exact' })
       .eq('status_hidup', 'meninggal')
@@ -201,7 +201,7 @@ function renderPaginasi() {
 function goPage(p) { if(p<1||p>Math.ceil(totalRows/perPage))return; currentPage=p; loadData(); window.scrollTo({top:0}); }
 
 async function loadMakam() {
-  const { data } = await BAFITS.db
+  const { data } = await BANITAMHID.db
     .from('anggota_keluarga')
     .select('nama_lengkap, lokasi_makam')
     .eq('status_hidup', 'meninggal')
