@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Pernikahan — BAFITS</title>
+  <title>Pernikahan — BANITAMHID</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="../css/main.css"/>
@@ -98,11 +98,11 @@ let filterSearch = '';
 let filterStatus = '';
 
 (async () => {
-  const session = await BAFITS.Auth.requireAuth();
+  const session = await BANITAMHID.Auth.requireAuth();
   if (!session) return;
-  const user    = await BAFITS.Auth.getUser();
-  const profile = await BAFITS.UserProfile.getProfile(user.id);
-  isAdmin       = await BAFITS.UserProfile.isAdmin();
+  const user    = await BANITAMHID.Auth.getUser();
+  const profile = await BANITAMHID.UserProfile.getProfile(user.id);
+  isAdmin       = await BANITAMHID.UserProfile.isAdmin();
 
   document.getElementById('root').outerHTML = `
   <div class="app-shell">
@@ -171,7 +171,7 @@ let filterStatus = '';
 })();
 
 async function loadStats() {
-  const { data } = await BAFITS.db.from('pernikahan_anggota').select('status');
+  const { data } = await BANITAMHID.db.from('pernikahan_anggota').select('status');
   const total  = data?.length || 0;
   const aktif  = data?.filter(d => d.status === 'aktif').length || 0;
   const cerai  = data?.filter(d => d.status === 'cerai').length || 0;
@@ -183,7 +183,7 @@ async function loadStats() {
 }
 
 async function loadAnggotaList() {
-  const { data } = await BAFITS.db.from('anggota_keluarga').select('id, nama_lengkap, jenis_kelamin').order('nama_lengkap');
+  const { data } = await BANITAMHID.db.from('anggota_keluarga').select('id, nama_lengkap, jenis_kelamin').order('nama_lengkap');
   allAnggota = data || [];
 }
 
@@ -197,7 +197,7 @@ async function loadData() {
   const tbody = document.getElementById('tbodyNikah');
   tbody.innerHTML = UI.skeletonRows(7, 8);
   try {
-    let query = BAFITS.db
+    let query = BANITAMHID.db
       .from('pernikahan_anggota')
       .select(`*, anggota:anggota_keluarga!anggota_id(id, nama_lengkap, jenis_kelamin, foto_profil_url)`, { count: 'exact' })
       .order('tanggal_menikah', { ascending: false })
@@ -302,7 +302,7 @@ function pilihAnggota(id, nama, jk) {
 }
 
 async function autoUrutan(anggotaId) {
-  const { count } = await BAFITS.db.from('pernikahan_anggota').select('*',{count:'exact',head:true}).eq('anggota_id', anggotaId);
+  const { count } = await BANITAMHID.db.from('pernikahan_anggota').select('*',{count:'exact',head:true}).eq('anggota_id', anggotaId);
   document.getElementById('n-urutan').value = (count || 0) + 1;
 }
 
@@ -349,12 +349,12 @@ function openForm(data = null) {
 }
 
 async function editNikah(id) {
-  const { data, error } = await BAFITS.db
+  const { data, error } = await BANITAMHID.db
     .from('pernikahan_anggota')
     .select(`*, anggota:anggota_keluarga!anggota_id(id, nama_lengkap)`)
     .eq('id', id).single();
   if (!error) openForm(data);
-  else BAFITS.Toast.error('Gagal memuat data.');
+  else BANITAMHID.Toast.error('Gagal memuat data.');
 }
 
 async function simpanNikah() {
@@ -381,16 +381,16 @@ async function simpanNikah() {
     };
 
     if (editingNikahId) {
-      const { error } = await BAFITS.db.from('pernikahan_anggota').update(payload).eq('id', editingNikahId);
+      const { error } = await BANITAMHID.db.from('pernikahan_anggota').update(payload).eq('id', editingNikahId);
       if (error) throw error;
     } else {
-      const { error } = await BAFITS.db.from('pernikahan_anggota').insert(payload);
+      const { error } = await BANITAMHID.db.from('pernikahan_anggota').insert(payload);
       if (error) throw error;
       // Update status_pernikahan di anggota
-      await BAFITS.db.from('anggota_keluarga').update({ status_pernikahan: payload.status === 'aktif' ? 'menikah' : payload.status }).eq('id', anggotaId);
+      await BANITAMHID.db.from('anggota_keluarga').update({ status_pernikahan: payload.status === 'aktif' ? 'menikah' : payload.status }).eq('id', anggotaId);
     }
 
-    BAFITS.Toast.success(editingNikahId ? 'Data diperbarui!' : 'Pernikahan berhasil dicatat!');
+    BANITAMHID.Toast.success(editingNikahId ? 'Data diperbarui!' : 'Pernikahan berhasil dicatat!');
     UI.closeModal('modalNikah');
     loadData(); loadStats();
   } catch (err) {
@@ -403,10 +403,10 @@ async function simpanNikah() {
 function hapusNikah(id, nama) {
   UI.confirm(`Hapus data pernikahan milik <strong>${nama}</strong>?`, async () => {
     try {
-      await BAFITS.db.from('pernikahan_anggota').delete().eq('id', id);
-      BAFITS.Toast.success('Data pernikahan dihapus.');
+      await BANITAMHID.db.from('pernikahan_anggota').delete().eq('id', id);
+      BANITAMHID.Toast.success('Data pernikahan dihapus.');
       loadData(); loadStats();
-    } catch (err) { BAFITS.Toast.error('Gagal: ' + err.message); }
+    } catch (err) { BANITAMHID.Toast.error('Gagal: ' + err.message); }
   }, 'Hapus');
 }
 </script>
