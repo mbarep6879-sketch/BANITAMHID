@@ -341,5 +341,5 @@ const Toast = {
 // EXPORT GLOBAL
 // ============================================================
 // Export dengan kedua nama agar kompatibel
-window.BAFITS = { db, Auth, UserProfile, Anggota, Foto, Notifikasi, AuditLog, Toast };
-window.BANITAMHID = window.BAFITS; // alias
+window.BANITAMHID = { db, Auth, UserProfile, Anggota, Foto, Notifikasi, AuditLog, Toast };
+window.BANITAMHID = window.BANITAMHID; // alias
