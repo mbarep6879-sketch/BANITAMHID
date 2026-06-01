@@ -482,8 +482,8 @@ CREATE POLICY "Admin hapus foto"
 -- Lepas komentar (--) dan ganti email sesuai akun Anda:
 
 -- UPDATE user_profiles
---   SET role = 'super_admin', nama_lengkap = 'Administrator'
---   WHERE email = 'admin@banitamhid.com';
+--   SET role = 'admintamhid', nama_lengkap = 'Admin Tamhid'
+--   WHERE email = 'admintamhid@gmail.com';
 
 
 -- ============================================================
