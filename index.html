@@ -386,7 +386,7 @@ mark{background:rgba(200,149,42,.28);border-radius:2px;color:inherit;padding:0 1
         <span class="cdot wait" id="connDot"></span>
         <span id="connTxt">Memeriksa koneksi...</span>
       </div>
-      <div class="lhint"><strong>💡 Demo Login:</strong><br>Admin: <code>admin</code> / <code>admin123</code><br>Anggota: <code>keluarga</code> / <code>tamhid2024</code></div>
+      <div class="lhint" id="lhintBox" style="display:none"></div>
       <div class="lfoot">BANITAMHID v2.1 — Powered by Supabase ☁️</div>
     </div>
   </div>
@@ -502,11 +502,36 @@ mark{background:rgba(200,149,42,.28);border-radius:2px;color:inherit;padding:0 1
     <div id="vAdmin" class="view">
       <div class="secbar">⚙️ Panel Administrasi</div>
       <div class="admin-grid">
-        <div class="acard"><h3>👥 Pengguna Sistem</h3><div id="admUsers"></div></div>
+        <div class="acard" style="grid-column:1/-1">
+          <h3>👥 Manajemen Akun Pengguna</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">
+            <!-- Form tambah akun -->
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--forest);margin-bottom:9px;text-transform:uppercase;letter-spacing:.5px">➕ Tambah Akun Baru</div>
+              <div style="display:flex;flex-direction:column;gap:7px">
+                <div class="fg2"><label>Nama Lengkap</label><input type="text" id="nuName" placeholder="Nama lengkap pengguna"></div>
+                <div class="fg2"><label>Username</label><input type="text" id="nuUser" placeholder="huruf kecil, tanpa spasi" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'')"></div>
+                <div class="fg2"><label>Password</label><input type="password" id="nuPass" placeholder="Min. 6 karakter"></div>
+                <div class="fg2"><label>Role</label>
+                  <select id="nuRole">
+                    <option value="member">👤 Anggota</option>
+                    <option value="admin">👑 Administrator</option>
+                  </select>
+                </div>
+                <button class="btn btn-p" onclick="addUser()" style="width:100%;justify-content:center;margin-top:3px">💾 Simpan Akun Baru</button>
+              </div>
+            </div>
+            <!-- Daftar akun -->
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--forest);margin-bottom:9px;text-transform:uppercase;letter-spacing:.5px">📋 Daftar Akun Terdaftar</div>
+              <div id="admUsers"></div>
+            </div>
+          </div>
+        </div>
         <div class="acard">
           <h3>🔐 Keamanan & Data</h3>
           <div style="display:flex;flex-direction:column;gap:8px">
-            <button class="btn btn-o" onclick="openChgPass()" style="width:100%;justify-content:center">🔑 Ubah Password</button>
+            <button class="btn btn-o" onclick="openChgPass()" style="width:100%;justify-content:center">🔑 Ubah Password Saya</button>
             <button class="btn btn-g" onclick="exportData()" style="width:100%;justify-content:center">💾 Export JSON</button>
             <button class="btn btn-g" onclick="document.getElementById('impFile').click()" style="width:100%;justify-content:center">📥 Import JSON</button>
             <button class="btn btn-g" onclick="syncNow()" style="width:100%;justify-content:center">🔄 Sinkron Manual</button>
@@ -756,8 +781,12 @@ async function bootApp(){
   const isAdm=curUser.role==='admin';
   ss('uAva',ini(curUser.name));ss('uNm',curUser.name);
   ss('uRl',isAdm?'👑 Administrator':'👤 Anggota');
-  ['ntAdmin','mnAdmin','btnAdd','mnAdd'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display=isAdm?'':'none';});
-  document.getElementById('btnDelDet').style.display=isAdm?'':'none';
+  // Tab Admin hanya untuk admin; semua user bisa tambah/edit/hapus data anggota
+  ['ntAdmin','mnAdmin'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display=isAdm?'':'none';});
+  // Tombol Tambah & Hapus selalu tampil untuk semua user
+  ['btnAdd','mnAdd'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='';});
+  // Tombol hapus di detail selalu tampil
+  document.getElementById('btnDelDet').style.display='';
   showPg('pgApp');
   updateStats();renderDash();renderAngg();renderTree();renderAdmin();toTab('dash');
   setupRT();
@@ -925,7 +954,7 @@ async function renderDash(){
   // Activity from Supabase
   const acts=await loadActs();
   sh('dActivity',acts.length?acts.map(a=>`<div class="act-it"><div class="act-dot">${a.ico}</div><div><div class="act-msg">${a.msg}</div><div class="act-tm">${relTime(a.created_at)}</div></div></div>`).join(''):'<div style="color:var(--txt-muted);font-size:13px;text-align:center;padding:16px">Belum ada aktivitas</div>');
-  sh('dQAdd',isAdm?`<button class="btn btn-p btn-lg" onclick="openAdd()" style="width:100%;justify-content:center;margin-top:4px">➕ Tambah Anggota Baru</button>`:'');
+  sh('dQAdd',`<button class="btn btn-p btn-lg" onclick="openAdd()" style="width:100%;justify-content:center;margin-top:4px">➕ Tambah Anggota Baru</button>`);
 }
 function relTime(iso){const d=Date.now()-new Date(iso).getTime();if(d<60000)return'Baru saja';if(d<3600000)return Math.floor(d/60000)+' menit lalu';if(d<86400000)return Math.floor(d/3600000)+' jam lalu';return new Date(iso).toLocaleDateString('id-ID');}
 
@@ -992,7 +1021,7 @@ function mkCard(m,q=''){
     ${tags?`<div class="mc-tags">${tags}</div>`:''}
     <div class="mc-ft">
       <button class="btn btn-g btn-sm" onclick="event.stopPropagation();printMbr('${m.id}')">🖨️</button>
-      ${isAdm?`<button class="btn btn-w btn-sm" onclick="event.stopPropagation();openEdit('${m.id}')">✏️</button><button class="btn btn-d btn-sm" onclick="event.stopPropagation();cfDel('${m.id}')">🗑️</button>`:''}
+      ${isAdm?`<button class="btn btn-w btn-sm" onclick="event.stopPropagation();openEdit('${m.id}')">✏️</button><button class="btn btn-d btn-sm" onclick="event.stopPropagation();cfDel('${m.id}')">🗑️</button>`:`<button class="btn btn-w btn-sm" onclick="event.stopPropagation();openEdit('${m.id}')">✏️</button><button class="btn btn-d btn-sm" onclick="event.stopPropagation();cfDel('${m.id}')">🗑️</button>`}
     </div>
   </div>`;
 }
@@ -1052,7 +1081,7 @@ function showDet(id){
   const nm=m.nama||'?',ii=ini(nm),[fg,bg]=avaClr(nm);
   const kids=getKids(id),sp=m.pasangan||[],isAdm=curUser?.role==='admin';
   const age=fmtAge(m.tgl),alm=m.status==='wafat';
-  document.getElementById('btnDelDet').style.display=isAdm?'':'none';
+  document.getElementById('btnDelDet').style.display='';
   // Breadcrumb
   let ancs=[],cur=m,safe=0;
   while(cur&&safe<12){ancs.unshift(cur);cur=cur.ayahId?members.find(x=>x.id===cur.ayahId):null;safe++;}
@@ -1265,7 +1294,7 @@ async function renderAdmin(){
   sh('admUsers',usrs.map(u=>{
     const isMe=u.id===curUser?.id,[fg,bg]=avaClr(u.name);
     return`<div class="ulit"><div class="ulav" style="background:${bg};color:${fg}">${ini(u.name)}</div><div style="flex:1"><div class="ulnm">${u.name}${isMe?' <small style="color:var(--txt-muted)">(Saya)</small>':''}</div><div style="font-size:11px;color:var(--txt-muted)">@${u.username}</div></div><span class="ulrl ${u.role==='admin'?'adm':''}">${u.role==='admin'?'👑 Admin':'👤 Anggota'}</span>${!isMe?`<button class="btn btn-d btn-sm" style="margin-left:6px" onclick="delUser('${u.id}','${u.name}')">✕</button>`:''}</div>`;
-  }).join('')+`<button class="btn btn-o" onclick="addUser()" style="width:100%;justify-content:center;margin-top:9px">➕ Tambah Pengguna</button>`);
+  }).join(''));
   const ml=members.filter(m=>m.gender==='L').length,fe=members.filter(m=>m.gender==='P').length;
   const mg=members.length?Math.max(...members.map(m=>m.gen||1)):0;
   const sp=members.reduce((a,m)=>a+(m.pasangan||[]).length,0);
@@ -1274,17 +1303,24 @@ async function renderAdmin(){
 }
 
 async function addUser(){
-  const name=prompt('Nama lengkap pengguna baru:');if(!name?.trim())return;
-  const uname=prompt('Username (huruf kecil, tanpa spasi):');if(!uname?.trim())return;
-  if(!/^[a-z0-9_]+$/.test(uname.trim())){toast('Username: huruf kecil, angka, underscore saja!','e');return;}
-  const pass=prompt('Password baru (min 6 karakter):');
+  const name=document.getElementById('nuName').value.trim();
+  const uname=document.getElementById('nuUser').value.trim();
+  const pass=document.getElementById('nuPass').value;
+  const role=document.getElementById('nuRole').value;
+  if(!name){toast('Nama lengkap harus diisi!','e');return;}
+  if(!uname||uname.length<3){toast('Username minimal 3 karakter!','e');return;}
+  if(!/^[a-z0-9_]+$/.test(uname)){toast('Username: huruf kecil, angka, underscore saja!','e');return;}
   if(!pass||pass.length<6){toast('Password minimal 6 karakter!','e');return;}
-  const role=confirm('Jadikan Administrator?\nOK = Admin, Batal = Anggota')?'admin':'member';
   try{
-    const{error}=await sb.from('bt_users').insert({id:'u_'+Date.now(),username:uname.trim(),password:pass,name:name.trim(),role,avatar:name.trim()[0].toUpperCase()});
+    const{error}=await sb.from('bt_users').insert({id:'u_'+Date.now(),username:uname,password:pass,name:name,role,avatar:name[0].toUpperCase()});
     if(error)throw error;
-    toast(`${name.trim()} berhasil ditambahkan ✅`,'s');renderAdmin();
-  }catch(e){toast('Gagal: '+e.message,'e');}
+    document.getElementById('nuName').value='';
+    document.getElementById('nuUser').value='';
+    document.getElementById('nuPass').value='';
+    document.getElementById('nuRole').value='member';
+    toast(`Akun "${name}" (@${uname}) berhasil ditambahkan ✅`,'s');
+    renderAdmin();
+  }catch(e){toast('Gagal: '+(e.message.includes('duplicate')||e.message.includes('unique')?'Username sudah dipakai!':e.message),'e');}
 }
 
 async function delUser(uid,uname){
