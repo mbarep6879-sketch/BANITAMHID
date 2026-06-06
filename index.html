@@ -576,6 +576,7 @@ mark{background:rgba(200,149,42,.28);border-radius:2px;color:inherit;padding:0 1
         <div class="fg2"><label>Status</label><select id="fSts"><option value="hidup">Hidup</option><option value="wafat">Wafat (Alm.)</option></select></div>
         <div class="fg2"><label>Tempat Lahir</label><input type="text" id="fTmpt" placeholder="Kota kelahiran"></div>
         <div class="fg2"><label>Tanggal Lahir</label><input type="date" id="fTgl"></div>
+        <div class="fg2"><label>NIK / No. KTP <span style="font-weight:400;color:var(--txt-muted)">(opsional)</span></label><input type="text" id="fNik" placeholder="Kosongkan jika tidak ada" maxlength="16" inputmode="numeric"></div>
         <div class="fg2"><label>No. HP / WA</label><input type="text" id="fHp" placeholder="08xx-xxxx-xxxx" inputmode="tel"></div>
         <div class="fg2"><label>Pekerjaan</label><input type="text" id="fKerja" placeholder="Pekerjaan / profesi"></div>
         <div class="fg2"><label>Pendidikan Terakhir</label>
@@ -1007,7 +1008,7 @@ function mkCard(m,q=''){
     <div class="mct">
       <div class="mc-av" style="${avaSty(nm,44)};border-radius:12px">${ii}</div>
       <div style="flex:1;min-width:0">
-        <div class="mc-nm">${alm?'<span style="color:var(--red);font-size:10px">✝ </span>':''}${hl(nm,q)}</div>
+        <div class="mc-nm">${alm?'<span style="font-size:11px">☪ </span>':''}${hl(nm,q)}</div>
         <div class="mc-sb">${m.tmpt||''}${m.tgl?' · '+fmtDate(m.tgl)+(age?' ('+age+')':''):''}${!m.tmpt&&!m.tgl&&m.kerja?m.kerja:''}</div>
       </div>
       <div class="mc-gb">G-${m.gen||'?'}</div>
@@ -1061,7 +1062,7 @@ function renderTree(){
       const[fg,bg]=avaClr(m.nama),kids=getKids(m.id),sp=m.pasangan||[];
       html+=`<div class="tnode ${m.gender==='L'?'m':'f'}" onclick="showDet('${m.id}')">
         <div class="tnav" style="background:${bg};color:${fg}">${ini(m.nama)}</div>
-        <div class="tnnm">${m.nama||'—'} ${m.status==='wafat'?'<span style="color:var(--red);font-size:9px">†</span>':''}</div>
+        <div class="tnnm">${m.nama||'—'} ${m.status==='wafat'?'<span style="font-size:9px">☪</span>':''}</div>
         ${sp.length?`<div class="tnmt" style="color:var(--gold)">× ${sp.map(p=>p.nama).join(', ')}</div>`:''}
         ${kids.length?`<div class="tnmt" style="color:var(--forest);font-weight:700">👶 ${kids.length}</div>`:''}
       </div>`;
@@ -1094,7 +1095,7 @@ function showDet(id){
         <div class="dnm">${nm}</div>
         <div class="dsb">${m.gender==='L'?'👨 Laki-laki':'👩 Perempuan'} · Generasi ${m.gen||'?'} · Anak ke-${m.urut||'?'}${age?' · <strong>'+age+'</strong>':''}</div>
         <div class="dpills">
-          ${alm?'<span class="pill pr">✝ Almarhum/ah</span>':'<span class="pill pg">Hidup</span>'}
+          ${alm?'<span class="pill pr">☪ Almarhum/ah</span>':'<span class="pill pg">Hidup</span>'}
           ${m.kerja?`<span class="pill pb">💼 ${m.kerja}</span>`:''}
           ${m.didik?`<span class="pill py">🎓 ${m.didik}</span>`:''}
         </div>
@@ -1208,8 +1209,6 @@ async function saveMbr(){
   const nm=(document.getElementById('fNama')?.value||'').trim();
   if(!nm){toast('Nama tidak boleh kosong!','e');return;}
   const nik=(document.getElementById('fNik')?.value||'').trim();
-  if(nik&&nik.length>0&&nik.length!==16){toast('NIK harus 16 digit!','e');return;}
-  if(nik&&!/^\d+$/.test(nik)){toast('NIK hanya boleh angka!','e');return;}
   const btn=document.getElementById('btnSave');
   btn.disabled=true;btn.textContent='Menyimpan ke Supabase...';
   const gv=id=>document.getElementById(id)?.value||'';
@@ -1428,7 +1427,7 @@ function printMbr(id){
   @media print{body{padding:14px}}</style></head><body>
   <div class="hd"><div class="av">${ini(m.nama)}</div>
   <div><h1>${m.nama}</h1><div class="sub">${m.gender==='L'?'Laki-laki':'Perempuan'} · Generasi ${m.gen||'?'} · Anak ke-${m.urut||'?'}</div>
-  <div style="margin-top:5px">${m.status==='wafat'?'<span class="pill" style="background:#fdf0ee;color:#c0392b">✝ Almarhum/ah</span>':'<span class="pill" style="background:#d4edda;color:#1a3a1f">Hidup</span>'}${m.kerja?`<span class="pill" style="background:#eaf2fb;color:#1a5276">💼 ${m.kerja}</span>`:''}${m.didik?`<span class="pill" style="background:#fdf3dc;color:#c8952a">🎓 ${m.didik}</span>`:''}</div></div>
+  <div style="margin-top:5px">${m.status==='wafat'?'<span class="pill" style="background:#fdf0ee;color:#c0392b">☪ Almarhum/ah</span>':'<span class="pill" style="background:#d4edda;color:#1a3a1f">Hidup</span>'}${m.kerja?`<span class="pill" style="background:#eaf2fb;color:#1a5276">💼 ${m.kerja}</span>`:''}${m.didik?`<span class="pill" style="background:#fdf3dc;color:#c8952a">🎓 ${m.didik}</span>`:''}</div></div>
   <div class="brand"><b>🌳 BANITAMHID</b>Dicetak: ${new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})}<br>Powered by Supabase ☁️</div></div>
   <div class="grid">
     <div class="it"><div class="lb">Tempat Lahir</div><div class="vl">${m.tmpt||'—'}</div></div>
