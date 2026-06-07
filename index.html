@@ -216,21 +216,53 @@ mark{background:rgba(200,149,42,.28);border-radius:2px;color:inherit;padding:0 1
 .empty{text-align:center;padding:55px 20px;color:var(--txt-muted)}
 .empty-ico{font-size:50px;margin-bottom:10px}.empty-ttl{font-size:17px;font-weight:700;color:var(--txt);margin-bottom:5px}.empty-sb{font-size:13px}
 
-/* TREE */
-.tbanner{background:linear-gradient(135deg,var(--forest),var(--forest-lt));color:#fff;border-radius:var(--r-lg);padding:17px 21px;display:flex;align-items:center;gap:15px;margin-bottom:18px}
-.tbav{width:50px;height:50px;border-radius:12px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:21px;flex-shrink:0}
-.tbnm{font-size:15px;font-weight:800}.tbsb{font-size:11.5px;opacity:.7;margin-top:2px}
-.tbst{margin-left:auto;display:flex;gap:16px;text-align:center;flex-shrink:0}
-.tbsn{font-size:19px;font-weight:800}.tbsl{font-size:10px;opacity:.65;text-transform:uppercase;letter-spacing:.3px}
-.tlvl{margin-bottom:22px}
-.tlbl{font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--txt-muted);margin-bottom:8px;display:flex;align-items:center;gap:8px}
-.tlbl::after{content:'';flex:1;height:1px;background:var(--bdr)}
-.tnodes{display:flex;flex-wrap:wrap;gap:8px}
-.tnode{background:#fff;border:1.5px solid var(--bdr);border-radius:11px;padding:9px 12px;min-width:120px;max-width:180px;cursor:pointer;transition:all .18s;text-align:center}
-.tnode:hover{border-color:var(--forest-lt);box-shadow:var(--sh);transform:translateY(-2px)}
-.tnode.m{border-color:rgba(26,82,118,.3);background:var(--blue-lt)}.tnode.f{border-color:rgba(200,149,42,.3);background:var(--gold-pale)}
-.tnav{width:31px;height:31px;border-radius:50%;margin:0 auto 5px;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700}
-.tnnm{font-size:11px;font-weight:700;line-height:1.3}.tnmt{font-size:9.5px;color:var(--txt-muted);margin-top:2px}
+/* TREE - Visual Modern */
+.tree-ctrl{display:flex;align-items:center;gap:8px;padding:10px 16px;background:#fff;border-bottom:1px solid var(--bdr);flex-wrap:wrap}
+.tgf{display:flex;gap:4px;flex-wrap:wrap;flex:1}
+.tgf-btn{padding:4px 10px;border-radius:20px;border:1.5px solid var(--bdr);background:transparent;font-size:11.5px;font-weight:600;color:var(--txt-muted);cursor:pointer;transition:all .15s}
+.tgf-btn.on{background:var(--forest);border-color:var(--forest);color:#fff}
+.tgf-btn:hover:not(.on){background:var(--mint);border-color:var(--forest-mid);color:var(--forest)}
+.tree-wrap{overflow:auto;padding:20px 12px 40px;background:radial-gradient(ellipse at 50% 0%,rgba(61,122,71,.06) 0%,transparent 60%);min-height:300px}
+.t-root-wrap{display:flex;justify-content:center;margin-bottom:0}
+.t-root-card{background:linear-gradient(135deg,var(--forest) 0%,var(--forest-lt) 100%);color:#fff;border-radius:20px;padding:16px 28px;text-align:center;box-shadow:0 8px 28px rgba(26,58,31,.35);min-width:220px;display:inline-block}
+.t-root-icon{font-size:30px;margin-bottom:5px}
+.t-root-nm{font-family:'Amiri',serif;font-size:16px;font-weight:700;line-height:1.4}
+.t-root-sub{font-size:11px;opacity:.75;margin-top:3px;font-family:'Amiri',serif}
+.t-root-stats{display:flex;gap:16px;justify-content:center;margin-top:9px}
+.t-root-st{text-align:center}.t-root-n{font-size:18px;font-weight:800}.t-root-l{font-size:10px;opacity:.65;text-transform:uppercase;letter-spacing:.3px}
+.t-conn-v{width:2px;height:28px;background:linear-gradient(to bottom,var(--forest-mid),var(--leaf));margin:0 auto}
+.t-gen-label{text-align:center;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:10px}
+.t-gen-pill{background:linear-gradient(135deg,var(--forest),var(--forest-mid));color:#fff;border-radius:20px;padding:4px 14px;font-size:11px;font-weight:700;letter-spacing:.5px;box-shadow:0 2px 8px rgba(26,58,31,.2)}
+.t-gen-line{height:1px;background:linear-gradient(to right,transparent,var(--bdr),transparent);flex:1;max-width:80px}
+.t-row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:0 6px}
+.t-fam{display:flex;flex-direction:column;align-items:center;background:rgba(255,255,255,.7);border-radius:16px;border:1.5px solid var(--bdr);padding:10px 8px 8px;min-width:150px;max-width:210px;box-shadow:0 2px 8px rgba(0,0,0,.06);transition:border-color .2s,box-shadow .2s;position:relative}
+.t-fam:hover{border-color:var(--forest-lt);box-shadow:0 4px 16px rgba(26,58,31,.12)}
+.t-fam.has-ch::after{content:'';position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);width:2px;height:18px;background:linear-gradient(to bottom,var(--forest-lt),var(--leaf))}
+.t-node{display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:transform .18s;padding:3px;border-radius:9px}
+.t-node:hover{transform:scale(1.05)}
+.t-av{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;border:2.5px solid white;box-shadow:0 2px 8px rgba(0,0,0,.14);margin-bottom:4px;position:relative;flex-shrink:0}
+.t-av.male{background:linear-gradient(135deg,#d0e8f8,#a8d0ef);color:#1a5276}
+.t-av.female{background:linear-gradient(135deg,#faecd0,#f5d48c);color:#9a6a10}
+.t-av .dead{position:absolute;bottom:-3px;right:-3px;width:16px;height:16px;border-radius:50%;background:var(--red);color:#fff;font-size:8px;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+.t-nm{font-size:10.5px;font-weight:700;text-align:center;color:var(--txt);line-height:1.3;max-width:86px}
+.t-mt{font-size:9px;color:var(--txt-muted);text-align:center;margin-top:1px}
+.t-couple{display:flex;align-items:center;gap:3px;flex-wrap:wrap;justify-content:center}
+.t-div{font-size:13px;color:var(--gold);font-weight:700}
+.t-extra-sp{display:flex;align-items:center;gap:4px;background:var(--gold-pale);border-radius:7px;padding:3px 8px;margin-top:3px;font-size:10px;font-weight:600;color:var(--gold);cursor:pointer}
+.t-extra-sp:hover{background:var(--gold-lt);color:#fff}
+.t-kids{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-top:6px;padding-top:6px;border-top:1px dashed var(--bdr)}
+.t-kid{display:flex;flex-direction:column;align-items:center;cursor:pointer}
+.t-kid-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.12);transition:transform .15s}
+.t-kid-av:hover{transform:scale(1.18)}
+.t-kid-av.male{background:linear-gradient(135deg,#d0e8f8,#a8d0ef);color:#1a5276}
+.t-kid-av.female{background:linear-gradient(135deg,#faecd0,#f5d48c);color:#9a6a10}
+.t-kid-nm{font-size:8px;color:var(--txt-mid);text-align:center;max-width:36px;margin-top:2px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-more{width:30px;height:30px;border-radius:50%;background:var(--warm);border:2px dashed var(--bdr);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--txt-muted);cursor:pointer}
+.t-drill{font-size:9px;color:var(--forest-lt);font-weight:600;margin-top:3px;background:none;border:none;cursor:pointer;padding:0}
+.t-drill:hover{color:var(--forest);text-decoration:underline}
+.tree-legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;padding:10px 0;border-top:1px solid var(--bdr);margin:0 16px;font-size:11px;color:var(--txt-muted)}
+.tree-legend span{display:flex;align-items:center;gap:5px}
+.leg-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
 
 /* MODAL */
 .bkdrop{position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px)}
@@ -257,7 +289,16 @@ mark{background:rgba(200,149,42,.28);border-radius:2px;color:inherit;padding:0 1
 .sp-rm{background:var(--red);color:#fff;border:none;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:600;cursor:pointer}
 .add-sp{width:100%;padding:9px;border:2px dashed rgba(200,149,42,.4);border-radius:10px;background:transparent;color:var(--gold);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px}
 .add-sp:hover{background:var(--gold-pale);border-color:var(--gold)}
-.dupe-box{background:rgba(200,149,42,.08);border:1.5px solid rgba(200,149,42,.3);border-radius:9px;padding:11px 13px;margin-bottom:11px}
+.anak-blk{background:var(--mint);border:1.5px solid var(--leaf-lt);border-radius:12px;padding:12px;margin-bottom:10px}
+.anak-blk-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.anak-blk-ttl{font-size:12px;font-weight:700;color:var(--forest-mid)}
+.anak-rm{background:var(--red);color:#fff;border:none;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:600;cursor:pointer}
+.add-anak{width:100%;padding:9px;border:2px dashed var(--leaf);border-radius:10px;background:transparent;color:var(--forest-mid);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px;margin-top:8px}
+.add-anak:hover{background:var(--mint);border-color:var(--forest-mid)}
+.qbar{background:var(--mint);border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:wrap}
+.qbar-txt{font-size:12.5px;font-weight:600;color:var(--forest)}
+.qbar-btns{display:flex;gap:6px;flex-wrap:wrap}
+.btn-teal{background:#0e6655;color:#fff}.btn-teal:hover{background:#0a5244}
 .dupe-t{font-size:12px;font-weight:700;color:var(--gold);margin-bottom:4px}
 .dupe-it{font-size:11px;padding:5px 9px;background:#fff;border-radius:6px;margin-top:4px;color:var(--txt-mid)}
 
@@ -488,15 +529,18 @@ mark{background:rgba(200,149,42,.28);border-radius:2px;color:inherit;padding:0 1
     </div>
     <!-- POHON -->
     <div id="vPohon" class="view">
-      <div class="tbanner">
-        <div class="tbav">👴</div>
-        <div><div class="tbnm">Tamhid bin Bahruddin</div><div class="tbsb">× Solihatin binti Rahmat</div></div>
-        <div class="tbst">
-          <div><div class="tbsn" id="tTotal">0</div><div class="tbsl">Anggota</div></div>
-          <div><div class="tbsn" id="tGen">0</div><div class="tbsl">Generasi</div></div>
-        </div>
+      <div class="tree-ctrl">
+        <div class="tgf" id="tgfWrap"></div>
+        <button class="btn btn-g" onclick="printAll()">🖨️ Cetak</button>
       </div>
-      <div id="treeBody" style="overflow-x:auto"></div>
+      <div class="tree-wrap" id="treeBody"></div>
+      <div class="tree-legend">
+        <span><div class="leg-dot" style="background:linear-gradient(135deg,#d0e8f8,#a8d0ef);border:2px solid #1a5276"></div>Laki-laki</span>
+        <span><div class="leg-dot" style="background:linear-gradient(135deg,#faecd0,#f5d48c);border:2px solid #c8952a"></div>Perempuan</span>
+        <span><div class="leg-dot" style="background:var(--red)"></div>Alm/Almh</span>
+        <span style="gap:3px">× Pasangan</span>
+        <span>👶 Anak</span>
+      </div>
     </div>
     <!-- ADMIN -->
     <div id="vAdmin" class="view">
@@ -595,6 +639,11 @@ mark{background:rgba(200,149,42,.28);border-radius:2px;color:inherit;padding:0 1
       </div>
       <div id="spList"></div>
       <button class="add-sp" onclick="addSp()">➕ Tambah Data Pasangan / Istri / Suami</button>
+      <div class="fgrid" style="margin-top:14px">
+        <div class="fsec">👶 Tambah Data Anak Sekaligus (opsional)</div>
+      </div>
+      <div id="anakList"></div>
+      <button class="add-anak" onclick="addAnak()">➕ Tambah Data Anak</button>
     </div>
     <div class="mft">
       <button class="btn btn-g" onclick="closeM('mForm')">Batal</button>
@@ -688,9 +737,12 @@ let curUser  = null;
 let editId   = null;
 let detId    = null;
 let spCnt    = 0;
+let anakCnt  = 0;
 let viewMode = 'list';
 let curTab   = 'dash';
 let syncBusy = false;
+let treeGenF = 0;
+const ROOT_A='Tamhid bin Bahruddin',ROOT_I='Solihatin binti Rahmat';
 
 // Avatar colour palette
 const AVA = [
@@ -1046,26 +1098,91 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 
 // ============================================================
-// TREE VIEW
+// TREE VIEW - Visual Modern
 // ============================================================
+function renderTgf(mg){
+  const w=document.getElementById('tgfWrap');if(!w)return;
+  let h=`<button class="tgf-btn ${treeGenF===0?'on':''}" onclick="setTGF(0)">Semua</button>`;
+  for(let g=1;g<=mg;g++)h+=`<button class="tgf-btn ${treeGenF===g?'on':''}" onclick="setTGF(${g})">Gen-${g}</button>`;
+  w.innerHTML=h;
+}
+function setTGF(g){treeGenF=g;renderTree();}
+
 function renderTree(){
   const cont=document.getElementById('treeBody');if(!cont)return;
   const mg=members.length?Math.max(...members.map(m=>m.gen||1)):0;
   ss('tGen',mg);ss('tTotal',members.length);
   if(!members.length){cont.innerHTML='<div class="empty"><div class="empty-ico">🌱</div><div class="empty-ttl">Pohon masih kosong</div><div class="empty-sb">Tambahkan anggota untuk melihat pohon silsilah.</div></div>';return;}
+  renderTgf(mg);
+  const genMax=treeGenF===0?mg:treeGenF;
   let html='';
-  for(let g=1;g<=mg;g++){
+  html+=`<div class="t-root-wrap"><div class="t-root-card">
+    <div class="t-root-icon">👴🤝👩</div>
+    <div class="t-root-nm">${ROOT_A}</div>
+    <div class="t-root-sub">× ${ROOT_I}</div>
+    <div class="t-root-stats">
+      <div class="t-root-st"><div class="t-root-n">${members.length}</div><div class="t-root-l">Anggota</div></div>
+      <div class="t-root-st"><div class="t-root-n">${mg}</div><div class="t-root-l">Generasi</div></div>
+    </div>
+  </div></div>`;
+  for(let g=1;g<=genMax;g++){
+    if(treeGenF!==0&&treeGenF!==g)continue;
     const gm=members.filter(m=>(m.gen||1)===g).sort((a,b)=>(a.urut||99)-(b.urut||99));
     if(!gm.length)continue;
-    html+=`<div class="tlvl"><div class="tlbl">🌿 Generasi ${g} <span style="font-size:10px;font-weight:400">(${gm.length})</span></div><div class="tnodes">`;
+    html+=`<div class="t-conn-v"></div>
+    <div>
+      <div class="t-gen-label">
+        <div class="t-gen-line"></div>
+        <div class="t-gen-pill">🌿 Generasi ${g} — ${gm.length} anggota</div>
+        <div class="t-gen-line"></div>
+      </div>
+      <div class="t-row">`;
     gm.forEach(m=>{
-      const[fg,bg]=avaClr(m.nama),kids=getKids(m.id),sp=m.pasangan||[];
-      html+=`<div class="tnode ${m.gender==='L'?'m':'f'}" onclick="showDet('${m.id}')">
-        <div class="tnav" style="background:${bg};color:${fg}">${ini(m.nama)}</div>
-        <div class="tnnm">${m.nama||'—'} ${m.status==='wafat'?'<span style="font-size:9px">☪</span>':''}</div>
-        ${sp.length?`<div class="tnmt" style="color:var(--gold)">× ${sp.map(p=>p.nama).join(', ')}</div>`:''}
-        ${kids.length?`<div class="tnmt" style="color:var(--forest);font-weight:700">👶 ${kids.length}</div>`:''}
+      const[fg,bg]=avaClr(m.nama),isMale=m.gender==='L',alm=m.status==='wafat';
+      const kids=getKids(m.id),sp=m.pasangan||[];
+      const hasKids=kids.length>0&&(treeGenF===0||treeGenF===g);
+      html+=`<div class="t-fam ${hasKids?'has-ch':''}" id="tf_${m.id}">`;
+      html+=`<div class="t-couple">`;
+      html+=`<div class="t-node" onclick="showDet('${m.id}')">
+        <div class="t-av ${isMale?'male':'female'}" style="background:${bg};color:${fg}">
+          ${ini(m.nama)}${alm?`<div class="dead">☪</div>`:''}
+        </div>
+        <div class="t-nm">${m.nama}</div>
+        ${fmtAge(m.tgl)?`<div class="t-mt">${fmtAge(m.tgl)}</div>`:''}
       </div>`;
+      if(sp.length>0){
+        const p=sp[0],[pf,pb]=avaClr(p.nama||'P'),pAlm=p.statusHidup==='wafat';
+        html+=`<div class="t-div">×</div>
+        <div class="t-node">
+          <div class="t-av female" style="background:${pb};color:${pf};${pAlm?'opacity:.75':''}">
+            ${ini(p.nama||'?')}${pAlm?`<div class="dead">☪</div>`:''}
+          </div>
+          <div class="t-nm">${p.nama||'—'}</div>
+          ${p.tglN?`<div class="t-mt">💍 ${fmtDate(p.tglN)}</div>`:''}
+        </div>`;
+      }
+      html+=`</div>`;
+      sp.slice(1).forEach((p,idx)=>{
+        html+=`<div class="t-extra-sp" onclick="showDet('${m.id}')">
+          <span>× Istri ${idx+2}: ${p.statusHidup==='wafat'?'☪ ':''} ${p.nama||'—'}</span>
+        </div>`;
+      });
+      if(hasKids){
+        const sk=kids.sort((a,b)=>(a.urut||99)-(b.urut||99));
+        const mx=6,show=sk.slice(0,mx),more=sk.length-mx;
+        html+=`<div class="t-kids">`;
+        show.forEach(c=>{
+          const[cf,cb]=avaClr(c.nama),cMale=c.gender==='L';
+          html+=`<div class="t-kid" onclick="showDet('${c.id}')">
+            <div class="t-kid-av ${cMale?'male':'female'}" style="background:${cb};color:${cf}" title="${c.nama}">${ini(c.nama)}</div>
+            <div class="t-kid-nm">${c.nama.split(' ')[0]}</div>
+          </div>`;
+        });
+        if(more>0)html+=`<div class="t-kid"><div class="t-more" onclick="showDet('${m.id}')">+${more}</div><div class="t-kid-nm">lainnya</div></div>`;
+        html+=`</div>`;
+      }
+      if(hasKids)html+=`<button class="t-drill" onclick="toTab('angg');document.getElementById('fltGen').value='${(m.gen||1)+1}';renderAngg()">Lihat Gen-${(m.gen||1)+1} ›</button>`;
+      html+=`</div>`;
     });
     html+=`</div></div>`;
   }
@@ -1088,7 +1205,9 @@ function showDet(id){
   let bread='';
   if(ancs.length>1){bread=`<div class="breadc">🌳 `;ancs.forEach((a,i)=>{if(i>0)bread+=' › ';bread+=`<a onclick="showDet('${a.id}')">${a.nama}</a>`;});bread+=`</div>`;}
 
-  let html=bread+`
+  let qbar=`<div class="qbar"><div class="qbar-txt">➕ Tambah dari <strong>${m.nama}</strong>:</div><div class="qbar-btns"><button class="btn btn-teal btn-sm" onclick="closeM('mDet');openAddChild('${id}')">👶 Tambah Anak</button><button class="btn btn-w btn-sm" onclick="closeM('mDet');openAddNikah('${id}')">💑 Tambah Pasangan</button></div></div>`;
+
+  let html=bread+qbar+`
     <div class="dhero">
       <div class="dav" style="${avaSty(nm,60)};border-radius:14px">${ii}</div>
       <div style="flex:1">
@@ -1154,7 +1273,7 @@ function clrForm(){
   ['fNama','fTmpt','fNik','fHp','fKerja','fAlamat','fAyah','fIbu','fCatatan'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
   const sv=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v;};
   sv('fJK2','L');sv('fSts','hidup');sv('fDidik','');sv('fTgl','');sv('fGen2','1');sv('fUrut','1');
-  sh('spList','');const da=document.getElementById('dupeAlert');if(da)da.style.display='none';spCnt=0;
+  sh('spList','');sh('anakList','');const da=document.getElementById('dupeAlert');if(da)da.style.display='none';spCnt=0;anakCnt=0;
 }
 
 function fillParents(excl=null){
@@ -1171,9 +1290,10 @@ function addSp(data=null){
   el.innerHTML=`<div class="sp-blk-hd"><div class="sp-blk-t">💑 Pasangan ${i}</div><button class="sp-rm" onclick="document.getElementById('${id}').remove()">✕ Hapus</button></div>
     <div class="fgrid">
       <div class="fg2 full"><label>Nama Pasangan *</label><input type="text" id="sp${i}nm" value="${data?.nama||''}" placeholder="Nama lengkap pasangan"></div>
-      <div class="fg2"><label>Tgl. Nikah</label><input type="date" id="sp${i}tN" value="${data?.tglN||''}"></div>
-      <div class="fg2"><label>Tempat Nikah</label><input type="text" id="sp${i}ttN" value="${data?.tmptN||''}" placeholder="Kota"></div>
-      <div class="fg2"><label>Status Nikah</label><select id="sp${i}sN"><option value="menikah" ${(data?.statusN||'menikah')==='menikah'?'selected':''}>Menikah</option><option value="cerai" ${data?.statusN==='cerai'?'selected':''}>Cerai</option><option value="cerai_mati" ${data?.statusN==='cerai_mati'?'selected':''}>Cerai Mati</option></select></div>
+      <div class="fg2"><label>Status Pasangan</label><select id="sp${i}sh"><option value="hidup" ${(data?.statusHidup||'hidup')==='hidup'?'selected':''}>💚 Hidup</option><option value="wafat" ${data?.statusHidup==='wafat'?'selected':''}>☪ Wafat (Almh.)</option></select></div>
+      <div class="fg2"><label>Status Pernikahan</label><select id="sp${i}sN"><option value="menikah" ${(data?.statusN||data?.statusNikah||'menikah')==='menikah'?'selected':''}>Menikah</option><option value="cerai" ${(data?.statusN||data?.statusNikah)==='cerai'?'selected':''}>Cerai</option><option value="cerai_mati" ${(data?.statusN||data?.statusNikah)==='cerai_mati'?'selected':''}>Cerai Mati</option></select></div>
+      <div class="fg2"><label>Tgl. Nikah</label><input type="date" id="sp${i}tN" value="${data?.tglN||data?.tglNikah||''}"></div>
+      <div class="fg2"><label>Tempat Nikah</label><input type="text" id="sp${i}ttN" value="${data?.tmptN||data?.tmptNikah||''}" placeholder="Kota"></div>
       <div class="fg2"><label>HP Pasangan</label><input type="text" id="sp${i}hp" value="${data?.hp||''}" placeholder="08xx"></div>
       <div class="fg2"><label>Catatan</label><input type="text" id="sp${i}ct" value="${data?.catatan||''}" placeholder="Catatan nikah..."></div>
     </div>`;
@@ -1185,9 +1305,65 @@ function getSpData(){
   document.querySelectorAll('[id^="sp_"]').forEach(el=>{
     const i=el.id.replace('sp_','');if(isNaN(i))return;
     const nm=document.getElementById(`sp${i}nm`)?.value?.trim();
-    if(nm)res.push({nama:nm,tglN:document.getElementById(`sp${i}tN`)?.value||'',tmptN:document.getElementById(`sp${i}ttN`)?.value||'',statusN:document.getElementById(`sp${i}sN`)?.value||'menikah',hp:document.getElementById(`sp${i}hp`)?.value||'',catatan:document.getElementById(`sp${i}ct`)?.value||''});
+    if(nm)res.push({nama:nm,statusHidup:document.getElementById(`sp${i}sh`)?.value||'hidup',tglN:document.getElementById(`sp${i}tN`)?.value||'',tmptN:document.getElementById(`sp${i}ttN`)?.value||'',statusN:document.getElementById(`sp${i}sN`)?.value||'menikah',hp:document.getElementById(`sp${i}hp`)?.value||'',catatan:document.getElementById(`sp${i}ct`)?.value||''});
   });
   return res;
+}
+
+function addAnak(d=null){
+  anakCnt++;const i=anakCnt,id=`ak_${i}`;
+  const el=document.createElement('div');el.className='anak-blk';el.id=id;
+  el.innerHTML=`<div class="anak-blk-hd"><div class="anak-blk-ttl">👶 Anak ${i}</div><button class="anak-rm" onclick="document.getElementById('${id}').remove()">✕ Hapus</button></div>
+    <div class="fgrid">
+      <div class="fg2 full"><label>Nama Anak *</label><input type="text" id="a${i}nm" value="${d?.nama||''}" placeholder="Nama lengkap anak"></div>
+      <div class="fg2"><label>Jenis Kelamin</label><select id="a${i}jk"><option value="L" ${(d?.gender||'L')==='L'?'selected':''}>Laki-laki</option><option value="P" ${d?.gender==='P'?'selected':''}>Perempuan</option></select></div>
+      <div class="fg2"><label>Status</label><select id="a${i}sts"><option value="hidup" ${(d?.status||'hidup')==='hidup'?'selected':''}>Hidup</option><option value="wafat" ${d?.status==='wafat'?'selected':''}>Wafat (Alm.)</option></select></div>
+      <div class="fg2"><label>Tempat Lahir</label><input type="text" id="a${i}tm" value="${d?.tmpt||''}" placeholder="Kota"></div>
+      <div class="fg2"><label>Tanggal Lahir</label><input type="date" id="a${i}tl" value="${d?.tgl||''}"></div>
+      <div class="fg2"><label>No. HP</label><input type="text" id="a${i}hp" value="${d?.hp||''}" placeholder="08xx"></div>
+      <div class="fg2"><label>Urutan ke-</label><input type="number" id="a${i}ur" min="1" value="${d?.urut||i}"></div>
+      <div class="fg2"><label>Pekerjaan</label><input type="text" id="a${i}kj" value="${d?.kerja||''}" placeholder="Pekerjaan"></div>
+    </div>`;
+  document.getElementById('anakList').appendChild(el);
+}
+
+function getAnakD(pid,pgen,pnama,pgender){
+  const res=[];
+  document.querySelectorAll('[id^="ak_"]').forEach(el=>{
+    const i=el.id.replace('ak_','');if(isNaN(i))return;
+    const nm=document.getElementById(`a${i}nm`)?.value?.trim();
+    if(nm)res.push({
+      nama:nm,gender:document.getElementById(`a${i}jk`)?.value||'L',
+      status:document.getElementById(`a${i}sts`)?.value||'hidup',
+      tmpt:document.getElementById(`a${i}tm`)?.value||'',
+      tgl:document.getElementById(`a${i}tl`)?.value||'',
+      hp:document.getElementById(`a${i}hp`)?.value||'',
+      urut:parseInt(document.getElementById(`a${i}ur`)?.value)||parseInt(i),
+      kerja:document.getElementById(`a${i}kj`)?.value||'',
+      gen:(pgen||1)+1,
+      ayahId:pgender==='L'?pid:null,
+      ibuId:pgender==='P'?pid:null,
+      ayah:pgender==='L'?pnama:'',
+      ibu:pgender==='P'?pnama:'',
+    });
+  });return res;
+}
+
+function openAddChild(parentId){
+  const parent=members.find(m=>m.id===parentId);if(!parent)return;
+  editId=null;spCnt=0;anakCnt=0;
+  ss('mFTtl','Tambah Anak — '+parent.nama);ss('mFIco','👶');
+  clrForm();fillParents();
+  if(parent.gender==='L'){document.getElementById('fAyah').value=parent.nama;document.getElementById('fAyahId').value=parent.id;}
+  else{document.getElementById('fIbu').value=parent.nama;document.getElementById('fIbuId').value=parent.id;}
+  document.getElementById('fGen2').value=(parent.gen||1)+1;
+  document.getElementById('fUrut').value=getKids(parentId).length+1;
+  document.getElementById('mForm').style.display='flex';
+}
+
+function openAddNikah(memberId){
+  openEdit(memberId);
+  setTimeout(()=>{addSp();document.getElementById('spList').scrollIntoView({behavior:'smooth'});},300);
 }
 
 function chkDupe(){
@@ -1229,6 +1405,13 @@ async function saveMbr(){
   if(ok){
     if(editId){const idx=members.findIndex(m=>m.id===editId);if(idx!==-1)members[idx]={...members[idx],...data};await dbLog('✏️',`<strong>${nm}</strong> diperbarui`);toast(`${nm} berhasil diperbarui ✅`,'s');}
     else{members.push(data);await dbLog('➕',`<strong>${nm}</strong> ditambahkan ke Generasi ${data.gen}`);toast(`${nm} berhasil ditambahkan ✅`,'s');}
+    /* Simpan data anak sekaligus */
+    const anakArr=getAnakD(data.id,data.gen,data.nama,data.gender);
+    for(const a of anakArr){
+      const na={...a,id:'mb_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,6),pasangan:[]};
+      const okA=await dbSave(na);
+      if(okA){members.push(na);await dbLog('👶',`<strong>${a.nama}</strong> anak dari ${nm}`);}
+    }
     localStorage.setItem(K_CACHE,JSON.stringify(members));
     closeM('mForm');updateStats();renderAngg();renderDash();renderTree();
   }
